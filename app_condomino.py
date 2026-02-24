@@ -100,7 +100,7 @@ def main(page: ft.Page):
         carregar_estatuto_morador()
         page.update()
 
-    page.appbar = ft.AppBar(bgcolor=ft.Colors.TEAL_700, elevation=0, visible=False)
+    page.appbar = ft.AppBar(bgcolor=ft.colors.TEAL_700, elevation=0, visible=False)
 
     # ==========================================
     # 1. LOGIN E DASHBOARD FINTECH
@@ -119,7 +119,7 @@ def main(page: ft.Page):
         label="CPF do Morador",
         hint_text="000.000.000-00",
         width=300,
-        border_color=ft.Colors.TEAL_600,
+        border_color=ft.colors.TEAL_600,
         on_change=formatar_cpf,
         max_length=14,
         counter_text=" ",
@@ -133,7 +133,7 @@ def main(page: ft.Page):
             ft.dropdown.Option("Apt 202"),
         ],
         width=300,
-        border_color=ft.Colors.TEAL_600,
+        border_color=ft.colors.TEAL_600,
     )
 
     def tentar_login(e):
@@ -158,12 +158,12 @@ def main(page: ft.Page):
     tela_login = ft.Container(
         content=ft.Column(
             [
-                ft.Icon(ft.Icons.SECURITY, size=80, color=ft.Colors.TEAL_700),
+                ft.Icon(ft.Icons.SECURITY, size=80, color=ft.colors.TEAL_700),
                 ft.Text(
                     "Portal do Morador",
                     size=26,
                     weight="bold",
-                    color=ft.Colors.TEAL_900,
+                    color=ft.colors.TEAL_900,
                 ),
                 ft.Container(height=20),
                 campo_cpf,
@@ -172,7 +172,7 @@ def main(page: ft.Page):
                     "Entrar no Sistema",
                     icon=ft.Icons.LOGIN,
                     on_click=tentar_login,
-                    bgcolor=ft.Colors.TEAL_700,
+                    bgcolor=ft.colors.TEAL_700,
                     color="white",
                     width=300,
                     height=50,
@@ -186,14 +186,14 @@ def main(page: ft.Page):
     )
 
     saudacao_nome = ft.Text("", size=22, weight="bold", color="white")
-    saudacao_unidade = ft.Text("", size=14, color=ft.Colors.TEAL_100)
-    letra_avatar = ft.Text("", size=24, weight="bold", color=ft.Colors.TEAL_900)
+    saudacao_unidade = ft.Text("", size=14, color=ft.colors.TEAL_100)
+    letra_avatar = ft.Text("", size=24, weight="bold", color=ft.colors.TEAL_900)
     header_dashboard = ft.Container(
         padding=ft.padding.only(top=50, left=30, right=30, bottom=30),
         gradient=ft.LinearGradient(
             begin=ft.alignment.top_left,
             end=ft.alignment.bottom_right,
-            colors=[ft.Colors.TEAL_700, ft.Colors.TEAL_900],
+            colors=[ft.colors.TEAL_700, ft.colors.TEAL_900],
         ),
         border_radius=ft.border_radius.only(bottom_left=30, bottom_right=30),
         content=ft.Row(
@@ -216,14 +216,14 @@ def main(page: ft.Page):
             border_radius=20,
             padding=20,
             shadow=ft.BoxShadow(
-                blur_radius=10, color=ft.Colors.BLACK12, offset=ft.Offset(0, 4)
+                blur_radius=10, color=ft.colors.BLACK12, offset=ft.Offset(0, 4)
             ),
             content=ft.Column(
                 [
                     ft.Container(
                         content=ft.Icon(icone, size=35, color=cor_icone),
                         padding=12,
-                        bgcolor=ft.Colors.with_opacity(0.1, cor_icone),
+                        bgcolor=ft.colors.with_opacity(0.1, cor_icone),
                         border_radius=50,
                     ),
                     ft.Container(height=5),
@@ -231,7 +231,7 @@ def main(page: ft.Page):
                         titulo,
                         weight="bold",
                         size=12,
-                        color=ft.Colors.BLUE_GREY_900,
+                        color=ft.colors.BLUE_GREY_900,
                         text_align="center",
                     ),
                 ],
@@ -246,29 +246,29 @@ def main(page: ft.Page):
             criar_cartao_premium(
                 "Assembleias",
                 ft.Icons.HOW_TO_VOTE,
-                ft.Colors.TEAL_600,
+                ft.colors.TEAL_600,
                 ir_para_assembleias,
             ),
             criar_cartao_premium(
-                "Ouvidoria", ft.Icons.FORUM, ft.Colors.PURPLE_600, ir_para_ouvidoria
+                "Ouvidoria", ft.Icons.FORUM, ft.colors.PURPLE_600, ir_para_ouvidoria
             ),
             criar_cartao_premium(
                 "Documentos",
                 ft.Icons.FOLDER_SPECIAL,
-                ft.Colors.RED_600,
+                ft.colors.RED_600,
                 ir_para_documentos,
             ),
             criar_cartao_premium(
-                "Priorizar", ft.Icons.LOW_PRIORITY, ft.Colors.ORANGE_600, ir_para_obras
+                "Priorizar", ft.Icons.LOW_PRIORITY, ft.colors.ORANGE_600, ir_para_obras
             ),
             criar_cartao_premium(
                 "Reservas",
                 ft.Icons.EVENT_AVAILABLE,
-                ft.Colors.CYAN_600,
+                ft.colors.CYAN_600,
                 ir_para_reservas,
             ),  # NOVO
             criar_cartao_premium(
-                "Regras", ft.Icons.MENU_BOOK, ft.Colors.INDIGO_600, ir_para_estatuto
+                "Regras", ft.Icons.MENU_BOOK, ft.colors.INDIGO_600, ir_para_estatuto
             ),  # NOVO
         ],
         spacing=15,
@@ -286,7 +286,7 @@ def main(page: ft.Page):
                                 "Acesso Rápido",
                                 size=18,
                                 weight="bold",
-                                color=ft.Colors.BLUE_GREY_800,
+                                color=ft.colors.BLUE_GREY_800,
                             ),
                             grid_dashboard,
                         ]
@@ -309,18 +309,18 @@ def main(page: ft.Page):
     # --- Estilo Premium para os Campos ---
     estilo_campo = {
         "border_radius": 12,
-        "border_color": ft.Colors.CYAN_400,
-        "focused_border_color": ft.Colors.CYAN_700,
-        "bgcolor": ft.Colors.CYAN_50,
+        "border_color": ft.colors.CYAN_400,
+        "focused_border_color": ft.colors.CYAN_700,
+        "bgcolor": ft.colors.CYAN_50,
         "content_padding": 15,
         "text_size": 14,
-        "label_style": ft.TextStyle(color=ft.Colors.CYAN_900, weight="bold"),
+        "label_style": ft.TextStyle(color=ft.colors.CYAN_900, weight="bold"),
     }
 
     # CORREÇÃO FLET ATUALIZADO: Usando prefix=ft.Icon() e já colocando a cor Azul-Ciano neles!
     campo_espaco = ft.Dropdown(
         label="1. Escolha o Espaço",
-        prefix=ft.Icon(ft.Icons.HOME_WORK, color=ft.Colors.CYAN_700),
+        prefix=ft.Icon(ft.Icons.HOME_WORK, color=ft.colors.CYAN_700),
         options=[
             ft.dropdown.Option("Salão de Festas"),
             ft.dropdown.Option("Churrasqueira"),
@@ -332,7 +332,7 @@ def main(page: ft.Page):
     campo_data_reserva = ft.TextField(
         label="2. Defina a Data",
         hint_text="Clique no calendário 👉",
-        prefix=ft.Icon(ft.Icons.DATE_RANGE, color=ft.Colors.CYAN_700),
+        prefix=ft.Icon(ft.Icons.DATE_RANGE, color=ft.colors.CYAN_700),
         read_only=True,
         expand=True,
         **estilo_campo,
@@ -340,7 +340,7 @@ def main(page: ft.Page):
 
     campo_horario = ft.Dropdown(
         label="3. Selecione o Turno",
-        prefix=ft.Icon(ft.Icons.ACCESS_TIME, color=ft.Colors.CYAN_700),
+        prefix=ft.Icon(ft.Icons.ACCESS_TIME, color=ft.colors.CYAN_700),
         options=[],
         **estilo_campo,
     )
@@ -423,7 +423,7 @@ def main(page: ft.Page):
     def cancelar_reserva_ui(id_res):
         banco_dados.cancelar_reserva_morador(id_res, unidade_logada)
         page.snack_bar = ft.SnackBar(
-            ft.Text("Reserva cancelada e data libertada!"), bgcolor=ft.Colors.ORANGE_700
+            ft.Text("Reserva cancelada e data libertada!"), bgcolor=ft.colors.ORANGE_700
         )
         page.snack_bar.open = True
         carregar_reservas_morador()
@@ -444,9 +444,9 @@ def main(page: ft.Page):
         for res in reservas:
             id_r, espaco, data_r, hor, uni, stat = res
             cor_st = (
-                ft.Colors.AMBER_600
+                ft.colors.AMBER_600
                 if stat == "Pendente"
-                else (ft.Colors.GREEN_600 if stat == "Aprovada" else ft.Colors.RED_600)
+                else (ft.colors.GREEN_600 if stat == "Aprovada" else ft.colors.RED_600)
             )
             icone_st = (
                 ft.Icons.SCHEDULE
@@ -472,7 +472,7 @@ def main(page: ft.Page):
                 border_radius=12,
                 border=ft.border.only(left=ft.border.BorderSide(6, cor_st)),
                 shadow=ft.BoxShadow(
-                    blur_radius=5, color=ft.Colors.BLACK12, offset=ft.Offset(0, 2)
+                    blur_radius=5, color=ft.colors.BLACK12, offset=ft.Offset(0, 2)
                 ),
                 content=ft.Row(
                     [
@@ -482,12 +482,12 @@ def main(page: ft.Page):
                                     espaco,
                                     weight="bold",
                                     size=15,
-                                    color=ft.Colors.BLUE_GREY_900,
+                                    color=ft.colors.BLUE_GREY_900,
                                 ),
                                 ft.Text(
                                     f"{data_r} | {hor}",
                                     size=12,
-                                    color=ft.Colors.BLUE_GREY_600,
+                                    color=ft.colors.BLUE_GREY_600,
                                 ),
                                 ft.Row(
                                     [
@@ -529,12 +529,12 @@ def main(page: ft.Page):
                     content=ft.Column(
                         [
                             ft.Icon(
-                                ft.Icons.EVENT_BUSY, size=50, color=ft.Colors.GREY_300
+                                ft.Icons.EVENT_BUSY, size=50, color=ft.colors.GREY_300
                             ),
                             ft.Text(
                                 "Nenhum evento agendado no condomínio.",
                                 italic=True,
-                                color=ft.Colors.GREY_500,
+                                color=ft.colors.GREY_500,
                             ),
                         ],
                         horizontal_alignment="center",
@@ -549,12 +549,12 @@ def main(page: ft.Page):
                 content=ft.Container(
                     padding=15,
                     border_radius=8,
-                    border=ft.border.all(1, ft.Colors.CYAN_100),
-                    bgcolor=ft.Colors.CYAN_50,
+                    border=ft.border.all(1, ft.colors.CYAN_100),
+                    bgcolor=ft.colors.CYAN_50,
                     content=ft.Row(
                         [
                             ft.Icon(
-                                ft.Icons.CELEBRATION, color=ft.Colors.CYAN_700, size=30
+                                ft.Icons.CELEBRATION, color=ft.colors.CYAN_700, size=30
                             ),
                             ft.Container(width=10),
                             ft.Column(
@@ -563,17 +563,17 @@ def main(page: ft.Page):
                                         f"{espaco_ag}",
                                         weight="bold",
                                         size=15,
-                                        color=ft.Colors.CYAN_900,
+                                        color=ft.colors.CYAN_900,
                                     ),
                                     ft.Text(
                                         f"{data_ag} • {hor_ag}",
                                         size=13,
-                                        color=ft.Colors.BLUE_GREY_700,
+                                        color=ft.colors.BLUE_GREY_700,
                                     ),
                                     ft.Text(
                                         f"Reservado por: {uni_ag}",
                                         size=11,
-                                        color=ft.Colors.GREY_600,
+                                        color=ft.colors.GREY_600,
                                         italic=True,
                                     ),
                                 ]
@@ -591,7 +591,7 @@ def main(page: ft.Page):
         padding=25,
         border_radius=15,
         shadow=ft.BoxShadow(
-            blur_radius=15, color=ft.Colors.BLACK12, offset=ft.Offset(0, 5)
+            blur_radius=15, color=ft.colors.BLACK12, offset=ft.Offset(0, 5)
         ),
         content=ft.Column(
             [
@@ -600,11 +600,11 @@ def main(page: ft.Page):
                         ft.Container(
                             content=ft.Icon(
                                 ft.Icons.EVENT_AVAILABLE,
-                                color=ft.Colors.CYAN_700,
+                                color=ft.colors.CYAN_700,
                                 size=24,
                             ),
                             padding=10,
-                            bgcolor=ft.Colors.CYAN_50,
+                            bgcolor=ft.colors.CYAN_50,
                             border_radius=50,
                         ),
                         ft.Column(
@@ -613,18 +613,18 @@ def main(page: ft.Page):
                                     "Agendar Espaço",
                                     size=18,
                                     weight="bold",
-                                    color=ft.Colors.BLUE_GREY_900,
+                                    color=ft.colors.BLUE_GREY_900,
                                 ),
                                 ft.Text(
                                     "Confira a agenda e faça sua reserva.",
-                                    color=ft.Colors.BLUE_GREY_500,
+                                    color=ft.colors.BLUE_GREY_500,
                                     size=12,
                                 ),
                             ]
                         ),
                     ]
                 ),
-                ft.Divider(height=25, color=ft.Colors.GREY_200),
+                ft.Divider(height=25, color=ft.colors.GREY_200),
                 campo_espaco,
                 ft.Row(
                     [
@@ -632,7 +632,7 @@ def main(page: ft.Page):
                         ft.IconButton(
                             icon=ft.Icons.CALENDAR_MONTH,
                             icon_size=35,
-                            icon_color=ft.Colors.CYAN_700,
+                            icon_color=ft.colors.CYAN_700,
                             on_click=lambda e: page.open(cal_reserva),
                         ),
                     ]
@@ -642,7 +642,7 @@ def main(page: ft.Page):
                 ft.ElevatedButton(
                     "Enviar Solicitação",
                     icon=ft.Icons.SEND,
-                    bgcolor=ft.Colors.CYAN_700,
+                    bgcolor=ft.colors.CYAN_700,
                     color="white",
                     on_click=solicitar_reserva,
                     height=45,
@@ -671,7 +671,7 @@ def main(page: ft.Page):
                     "Agenda Oficial do Condomínio",
                     weight="bold",
                     size=18,
-                    color=ft.Colors.CYAN_900,
+                    color=ft.colors.CYAN_900,
                 ),
                 ft.Text(
                     "Fique por dentro de quais áreas comuns estarão ocupadas nos próximos dias.",
@@ -721,12 +721,12 @@ def main(page: ft.Page):
         for r in regras:
             lista_regras_ui.controls.append(
                 ft.ExpansionTile(
-                    title=ft.Text(r[1], weight="bold", color=ft.Colors.INDIGO_900),
-                    leading=ft.Icon(ft.Icons.GAVEL, color=ft.Colors.INDIGO_600),
+                    title=ft.Text(r[1], weight="bold", color=ft.colors.INDIGO_900),
+                    leading=ft.Icon(ft.Icons.GAVEL, color=ft.colors.INDIGO_600),
                     controls=[
                         ft.Container(
                             padding=15,
-                            bgcolor=ft.Colors.INDIGO_50,
+                            bgcolor=ft.colors.INDIGO_50,
                             content=ft.Text(r[2], size=14),
                         )
                     ],
@@ -741,7 +741,7 @@ def main(page: ft.Page):
                     "Manual do Condomínio",
                     size=22,
                     weight="bold",
-                    color=ft.Colors.INDIGO_900,
+                    color=ft.colors.INDIGO_900,
                 ),
                 ft.Text(
                     "Conheça as regras e normas do nosso condomínio atualizadas pela gestão.",
@@ -769,7 +769,7 @@ def main(page: ft.Page):
                     "Central de Transparência",
                     size=22,
                     weight="bold",
-                    color=ft.Colors.RED_900,
+                    color=ft.colors.RED_900,
                 ),
                 ft.Text(
                     "Selecione a categoria para visualizar os PDFs oficiais.",
@@ -942,11 +942,11 @@ def main(page: ft.Page):
                     alignment=ft.alignment.center,
                     content=ft.Column(
                         [
-                            ft.Icon(ft.Icons.INBOX, size=50, color=ft.Colors.GREY_300),
+                            ft.Icon(ft.Icons.INBOX, size=50, color=ft.colors.GREY_300),
                             ft.Text(
                                 "Nenhum chamado no momento.",
                                 italic=True,
-                                color=ft.Colors.GREY_500,
+                                color=ft.colors.GREY_500,
                             ),
                         ],
                         horizontal_alignment="center",
@@ -955,19 +955,19 @@ def main(page: ft.Page):
             )
         for ch in chamados:
             id_ch, uni, stat, data, cat, txt, resp = ch
-            c_cat = ft.Colors.GREY_600
+            c_cat = ft.colors.GREY_600
             is_pendente = stat == "Pendente"
             c_stat = (
-                ft.Colors.RED_600
+                ft.colors.RED_600
                 if is_pendente
                 else (
-                    ft.Colors.GREEN_600 if stat == "Resolvido" else ft.Colors.BLUE_600
+                    ft.colors.GREEN_600 if stat == "Resolvido" else ft.colors.BLUE_600
                 )
             )
             badge_status = ft.Container(
                 padding=ft.padding.only(left=10, right=10, top=4, bottom=4),
                 border_radius=15,
-                bgcolor=ft.Colors.RED_50 if is_pendente else ft.Colors.GREEN_50,
+                bgcolor=ft.colors.RED_50 if is_pendente else ft.colors.GREEN_50,
                 border=ft.border.all(1, c_stat),
                 content=ft.Row(
                     [
@@ -981,15 +981,15 @@ def main(page: ft.Page):
                     margin=ft.margin.only(top=15),
                     padding=15,
                     border_radius=10,
-                    border=ft.border.all(1, ft.Colors.PURPLE_100),
-                    bgcolor=ft.Colors.PURPLE_50,
+                    border=ft.border.all(1, ft.colors.PURPLE_100),
+                    bgcolor=ft.colors.PURPLE_50,
                     content=ft.Row(
                         [
                             ft.CircleAvatar(
                                 content=ft.Icon(
                                     ft.Icons.SUPPORT_AGENT, color="white", size=16
                                 ),
-                                bgcolor=ft.Colors.PURPLE_400,
+                                bgcolor=ft.colors.PURPLE_400,
                                 radius=16,
                             ),
                             ft.Column(
@@ -997,11 +997,11 @@ def main(page: ft.Page):
                                     ft.Text(
                                         "RESPOSTA DO SÍNDICO",
                                         weight="bold",
-                                        color=ft.Colors.PURPLE_900,
+                                        color=ft.colors.PURPLE_900,
                                         size=10,
                                     ),
                                     ft.Text(
-                                        resp, size=13, color=ft.Colors.BLUE_GREY_900
+                                        resp, size=13, color=ft.colors.BLUE_GREY_900
                                     ),
                                 ],
                                 expand=True,
@@ -1019,7 +1019,7 @@ def main(page: ft.Page):
                 border_radius=12,
                 border=ft.border.only(left=ft.border.BorderSide(6, c_cat)),
                 shadow=ft.BoxShadow(
-                    blur_radius=10, color=ft.Colors.BLACK12, offset=ft.Offset(0, 4)
+                    blur_radius=10, color=ft.colors.BLACK12, offset=ft.Offset(0, 4)
                 ),
                 content=ft.Column(
                     [
@@ -1027,7 +1027,7 @@ def main(page: ft.Page):
                             [
                                 ft.Text(
                                     f"#{id_ch} • {data[:10]}",
-                                    color=ft.Colors.GREY_400,
+                                    color=ft.colors.GREY_400,
                                     size=11,
                                     weight="bold",
                                 )
@@ -1039,7 +1039,7 @@ def main(page: ft.Page):
                                 ft.Text(
                                     uni,
                                     weight="bold",
-                                    color=ft.Colors.BLUE_GREY_900,
+                                    color=ft.colors.BLUE_GREY_900,
                                     size=16,
                                 ),
                                 ft.Container(expand=True),
@@ -1049,7 +1049,7 @@ def main(page: ft.Page):
                         ft.Container(
                             padding=ft.padding.only(left=5),
                             content=ft.Text(
-                                txt, size=14, color=ft.Colors.BLUE_GREY_800
+                                txt, size=14, color=ft.colors.BLUE_GREY_800
                             ),
                         ),
                         caixa_resposta,
@@ -1064,7 +1064,7 @@ def main(page: ft.Page):
         padding=25,
         border_radius=15,
         shadow=ft.BoxShadow(
-            blur_radius=15, color=ft.Colors.BLACK12, offset=ft.Offset(0, 5)
+            blur_radius=15, color=ft.colors.BLACK12, offset=ft.Offset(0, 5)
         ),
         content=ft.Column(
             [
@@ -1073,11 +1073,11 @@ def main(page: ft.Page):
                         ft.Container(
                             content=ft.Icon(
                                 ft.Icons.HEADSET_MIC,
-                                color=ft.Colors.PURPLE_700,
+                                color=ft.colors.PURPLE_700,
                                 size=24,
                             ),
                             padding=10,
-                            bgcolor=ft.Colors.PURPLE_50,
+                            bgcolor=ft.colors.PURPLE_50,
                             border_radius=50,
                         ),
                         ft.Column(
@@ -1086,13 +1086,13 @@ def main(page: ft.Page):
                                     "Fale com o Síndico",
                                     size=18,
                                     weight="bold",
-                                    color=ft.Colors.BLUE_GREY_900,
+                                    color=ft.colors.BLUE_GREY_900,
                                 )
                             ]
                         ),
                     ]
                 ),
-                ft.Divider(height=25, color=ft.Colors.GREY_200),
+                ft.Divider(height=25, color=ft.colors.GREY_200),
                 ft.Row([cat_input]),
                 texto_input,
                 ft.Container(height=5),
@@ -1101,7 +1101,7 @@ def main(page: ft.Page):
                         ft.ElevatedButton(
                             "Enviar Mensagem",
                             icon=ft.Icons.SEND,
-                            bgcolor=ft.Colors.PURPLE_700,
+                            bgcolor=ft.colors.PURPLE_700,
                             color="white",
                             on_click=abrir_novo_chamado_premium,
                             height=45,
@@ -1120,7 +1120,7 @@ def main(page: ft.Page):
                     "Seus Chamados",
                     size=18,
                     weight="bold",
-                    color=ft.Colors.BLUE_GREY_900,
+                    color=ft.colors.BLUE_GREY_900,
                 ),
                 lista_chamados_ui,
             ]
@@ -1139,7 +1139,7 @@ def main(page: ft.Page):
                     "Selecione a Assembleia",
                     weight="bold",
                     size=18,
-                    color=ft.Colors.BLUE_GREY_900,
+                    color=ft.colors.BLUE_GREY_900,
                 ),
                 lista_ass_ui,
             ]
@@ -1156,7 +1156,7 @@ def main(page: ft.Page):
                     [
                         ft.IconButton(
                             ft.Icons.ARROW_BACK,
-                            icon_color=ft.Colors.BLUE_900,
+                            icon_color=ft.colors.BLUE_900,
                             on_click=lambda e: (
                                 page.appbar.title._set_value("Assembleias"),
                                 esconder_tudo(),
@@ -1168,7 +1168,7 @@ def main(page: ft.Page):
                             "Pautas em Deliberação",
                             weight="bold",
                             size=18,
-                            color=ft.Colors.BLUE_900,
+                            color=ft.colors.BLUE_900,
                         ),
                     ]
                 ),
@@ -1203,13 +1203,13 @@ def main(page: ft.Page):
                                     [
                                         ft.Icon(
                                             ft.Icons.ACCOUNT_BALANCE,
-                                            color=ft.Colors.TEAL_700,
+                                            color=ft.colors.TEAL_700,
                                         ),
                                         ft.Text(
                                             ass[3].upper(),
-                                            color=ft.Colors.GREEN_700
+                                            color=ft.colors.GREEN_700
                                             if ass[3] == "Aberta"
-                                            else ft.Colors.RED_700,
+                                            else ft.colors.RED_700,
                                             weight="bold",
                                             size=12,
                                         ),
@@ -1243,7 +1243,7 @@ def main(page: ft.Page):
                                 ),
                             ]
                         ),
-                        bgcolor=ft.Colors.RED_50,
+                        bgcolor=ft.colors.RED_50,
                         padding=10,
                         border_radius=5,
                         alignment=ft.alignment.center,
@@ -1258,14 +1258,14 @@ def main(page: ft.Page):
                                     "VOTO REGISTRADO:",
                                     size=12,
                                     weight="bold",
-                                    color=ft.Colors.GREEN_900,
+                                    color=ft.colors.GREEN_900,
                                 ),
                                 ft.Row(
                                     [
                                         ft.Icon(ft.Icons.CHECK_CIRCLE, color="green"),
                                         ft.Text(
                                             f'"{meu_voto.upper()}"',
-                                            color=ft.Colors.GREEN_700,
+                                            color=ft.colors.GREEN_700,
                                             weight="bold",
                                             size=18,
                                         ),
@@ -1275,7 +1275,7 @@ def main(page: ft.Page):
                             ],
                             horizontal_alignment="center",
                         ),
-                        bgcolor=ft.Colors.GREEN_50,
+                        bgcolor=ft.colors.GREEN_50,
                         padding=15,
                         border_radius=8,
                     )
@@ -1284,14 +1284,14 @@ def main(page: ft.Page):
                 area_votacao.controls.append(
                     ft.Container(
                         padding=15,
-                        bgcolor=ft.Colors.BLUE_GREY_50,
+                        bgcolor=ft.colors.BLUE_GREY_50,
                         border_radius=8,
                         content=ft.Column(
                             [
                                 ft.Text(
                                     "CÉDULA DE VOTAÇÃO",
                                     weight="bold",
-                                    color=ft.Colors.BLUE_GREY_800,
+                                    color=ft.colors.BLUE_GREY_800,
                                     text_align="center",
                                 ),
                                 ft.Column(
@@ -1299,7 +1299,7 @@ def main(page: ft.Page):
                                         ft.ElevatedButton(
                                             "APROVAR (SIM)",
                                             icon=ft.Icons.THUMB_UP,
-                                            bgcolor=ft.Colors.GREEN_700,
+                                            bgcolor=ft.colors.GREEN_700,
                                             color="white",
                                             on_click=lambda e, i=p[0]: (
                                                 banco_dados.registrar_voto(
@@ -1314,7 +1314,7 @@ def main(page: ft.Page):
                                         ft.ElevatedButton(
                                             "REJEITAR (NÃO)",
                                             icon=ft.Icons.THUMB_DOWN,
-                                            bgcolor=ft.Colors.RED_700,
+                                            bgcolor=ft.colors.RED_700,
                                             color="white",
                                             on_click=lambda e, i=p[0]: (
                                                 banco_dados.registrar_voto(
@@ -1346,9 +1346,9 @@ def main(page: ft.Page):
                                     f"#{p[0]} - {p[1]}",
                                     weight="bold",
                                     size=18,
-                                    color=ft.Colors.TEAL_900,
+                                    color=ft.colors.TEAL_900,
                                 ),
-                                ft.Text(p[2], size=14, color=ft.Colors.BLACK87),
+                                ft.Text(p[2], size=14, color=ft.colors.BLACK87),
                                 ft.Container(height=10),
                                 ft.Image(
                                     src=p[3], border_radius=8, fit=ft.ImageFit.COVER
@@ -1374,14 +1374,14 @@ def main(page: ft.Page):
                     "Vote nas prioridades",
                     size=22,
                     weight="bold",
-                    color=ft.Colors.ORANGE_900,
+                    color=ft.colors.ORANGE_900,
                 ),
                 ft.Text(
                     "Avalie de 1 a 5 estrelas o que você considera mais urgente.",
                     size=13,
-                    color=ft.Colors.BLUE_GREY_600,
+                    color=ft.colors.BLUE_GREY_600,
                 ),
-                ft.Divider(color=ft.Colors.ORANGE_200),
+                ft.Divider(color=ft.colors.ORANGE_200),
                 lista_obras_ui,
             ]
         ),
@@ -1404,9 +1404,9 @@ def main(page: ft.Page):
             botoes = [
                 ft.IconButton(
                     icon=ft.Icons.STAR if i <= minha_nota else ft.Icons.STAR_BORDER,
-                    icon_color=ft.Colors.AMBER_500
+                    icon_color=ft.colors.AMBER_500
                     if i <= minha_nota
-                    else ft.Colors.GREY_400,
+                    else ft.colors.GREY_400,
                     icon_size=32,
                     padding=0,
                     on_click=lambda e, i_ob=ob[0], n=i: (
@@ -1422,23 +1422,23 @@ def main(page: ft.Page):
                     content=ft.Container(
                         padding=20,
                         border_radius=10,
-                        border=ft.border.all(1, ft.Colors.ORANGE_200),
-                        bgcolor=ft.Colors.ORANGE_50,
+                        border=ft.border.all(1, ft.colors.ORANGE_200),
+                        bgcolor=ft.colors.ORANGE_50,
                         content=ft.Column(
                             [
                                 ft.Text(
                                     ob[1],
                                     weight="bold",
                                     size=18,
-                                    color=ft.Colors.ORANGE_900,
+                                    color=ft.colors.ORANGE_900,
                                 ),
                                 ft.Text(
                                     f"Custo: {ob[3] or 'N/A'}",
                                     size=12,
-                                    color=ft.Colors.GREY_700,
+                                    color=ft.colors.GREY_700,
                                 ),
                                 ft.Divider(),
-                                ft.Text(ob[2], size=14, color=ft.Colors.BLUE_GREY_800),
+                                ft.Text(ob[2], size=14, color=ft.colors.BLUE_GREY_800),
                                 ft.Container(
                                     padding=10,
                                     border_radius=8,
@@ -1449,7 +1449,7 @@ def main(page: ft.Page):
                                                 "Qual a urgência disto?",
                                                 size=12,
                                                 weight="bold",
-                                                color=ft.Colors.BLUE_GREY_500,
+                                                color=ft.colors.BLUE_GREY_500,
                                             ),
                                             ft.Row(
                                                 botoes, alignment="center", spacing=0
@@ -1480,4 +1480,5 @@ def main(page: ft.Page):
 
 porta = int(os.environ.get("PORT", 8080))
 ft.app(target=main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir=ASSETS_DIR)
+
 
