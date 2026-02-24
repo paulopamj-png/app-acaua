@@ -14,8 +14,8 @@ DIR_RELATORIOS = os.path.join(DIRETORIO_ATUAL, "Relatorios_Gerados")
 def main(page: ft.Page):
     page.title = "App do Condómino - Acauã"
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.window.width = 400
-    page.window.height = 750
+    #page.window.width = 400
+    #page.window.height = 750
     page.bgcolor = "#F4F7FC"
     page.padding = 0
 
@@ -1480,3 +1480,4 @@ def main(page: ft.Page):
 
 porta = int(os.environ.get("PORT", 8080))
 ft.app(target=main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir=ASSETS_DIR)
+
