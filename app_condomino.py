@@ -100,8 +100,9 @@ def main(page: ft.Page):
         carregar_estatuto_morador()
         page.update()
 
-    page.appbar = ft.AppBar(bgcolor=ft.colors.TEAL_700, elevation=0, visible=False)
-
+    page.appbar = ft.AppBar(bgcolor=ft.colors.TEAL_700, elevation=0)
+    page.appbar.visible = False
+    
     # ==========================================
     # 1. LOGIN E DASHBOARD FINTECH
     # ==========================================
@@ -1480,5 +1481,6 @@ def main(page: ft.Page):
 
 porta = int(os.environ.get("PORT", 8080))
 ft.app(target=main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir=ASSETS_DIR)
+
 
 
