@@ -5,7 +5,7 @@ import datetime
 # CONEXÃO COM A NUVEM (SUPABASE / POSTGRESQL)
 # ==========================================
 # ⚠️ SUBSTITUA 'SUA_SENHA_AQUI' PELA SUA SENHA REAL DO SUPABASE!
-URL_BANCO = "postgresql://postgres:h8ERjbMi4Uu70jTY@db.zzqgqaotepitoevfxbns.supabase.co:5432/postgres"
+URL_BANCO = "postgresql://postgres.zzqgqaotepitoevfxbns:[h8ERjbMi4Uu70jTY]@aws-1-sa-east-1.pooler.supabase.com:6543/postgres"
 
 
 def conectar():
@@ -622,3 +622,4 @@ def excluir_regra_estatuto(id_regra):
     conexao.cursor().execute("DELETE FROM estatuto WHERE id = %s", (id_regra,))
     conexao.commit()
     conexao.close()
+
