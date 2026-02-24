@@ -3,13 +3,15 @@ import banco_dados
 import os
 import datetime
 
-# Configurações de diretório adaptadas para a nuvem
+# Diretórios ajustados para o servidor
 DIRETORIO_ATUAL = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(DIRETORIO_ATUAL, "assets")
 
 def main(page: ft.Page):
     page.title = "App do Condômino - Acauã"
     page.theme_mode = ft.ThemeMode.LIGHT
+    # page.window.width = 400  -> Removido para compatibilidade Web
+    # page.window.height = 750 -> Removido para compatibilidade Web
     page.bgcolor = "#F4F7FC"
     page.padding = 0
 
@@ -31,7 +33,8 @@ def main(page: ft.Page):
         tela_estatuto.visible = False
 
     def ir_para_login(e=None):
-        page.appbar.visible = False
+        if page.appbar:
+            page.appbar.visible = False
         esconder_tudo()
         tela_login.visible = True
         page.update()
@@ -40,7 +43,8 @@ def main(page: ft.Page):
         saudacao_nome.value = f"Olá, {nome_logado.split()[0]}"
         saudacao_unidade.value = f"Unidade: {unidade_logada}"
         letra_avatar.value = nome_logado[0].upper()
-        page.appbar.visible = False
+        if page.appbar:
+            page.appbar.visible = False
         esconder_tudo()
         tela_dashboard.visible = True
         page.update()
@@ -94,7 +98,7 @@ def main(page: ft.Page):
         carregar_estatuto_morador()
         page.update()
 
-    # Correção AppBar: Definindo visibilidade separadamente
+    # Correção AppBar: Inicialização segura
     page.appbar = ft.AppBar(bgcolor=ft.colors.TEAL_700, elevation=0)
     page.appbar.visible = False
     
@@ -106,7 +110,7 @@ def main(page: ft.Page):
         r = ""
         for i, c in enumerate(v):
             if i == 3 or i == 6: r += "."
-            if i == 9: r += "-"
+            elif i == 9: r += "-"
             r += c
         e.control.value = r
         e.control.update()
@@ -139,9 +143,10 @@ def main(page: ft.Page):
             page.snack_bar.open = True
             page.update()
             return
-        nome = banco_dados.validar_login_morador(
-            "".join(filter(str.isdigit, campo_cpf.value)), campo_unidade.value
-        )
+        
+        cpf_limpo = "".join(filter(str.isdigit, campo_cpf.value))
+        nome = banco_dados.validar_login_morador(cpf_limpo, campo_unidade.value)
+        
         if nome:
             nome_logado = nome
             unidade_logada = campo_unidade.value
@@ -155,12 +160,7 @@ def main(page: ft.Page):
         content=ft.Column(
             [
                 ft.Icon(ft.icons.SECURITY, size=80, color=ft.colors.TEAL_700),
-                ft.Text(
-                    "Portal do Morador",
-                    size=26,
-                    weight="bold",
-                    color=ft.colors.TEAL_900,
-                ),
+                ft.Text("Portal do Morador", size=26, weight="bold", color=ft.colors.TEAL_900),
                 ft.Container(height=20),
                 campo_cpf,
                 campo_unidade,
@@ -198,9 +198,7 @@ def main(page: ft.Page):
                 ft.CircleAvatar(content=letra_avatar, bgcolor="white", radius=30),
                 ft.Container(width=10),
                 ft.Column([saudacao_nome, saudacao_unidade], spacing=2, expand=True),
-                ft.IconButton(
-                    ft.icons.LOGOUT, icon_color="white", on_click=ir_para_login
-                ),
+                ft.IconButton(ft.icons.LOGOUT, icon_color="white", on_click=ir_para_login),
             ],
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         ),
@@ -212,9 +210,7 @@ def main(page: ft.Page):
             bgcolor="white",
             border_radius=20,
             padding=20,
-            shadow=ft.BoxShadow(
-                blur_radius=10, color=ft.colors.BLACK12, offset=ft.Offset(0, 4)
-            ),
+            shadow=ft.BoxShadow(blur_radius=10, color=ft.colors.BLACK12, offset=ft.Offset(0, 4)),
             content=ft.Column(
                 [
                     ft.Container(
@@ -224,13 +220,7 @@ def main(page: ft.Page):
                         border_radius=50,
                     ),
                     ft.Container(height=5),
-                    ft.Text(
-                        titulo,
-                        weight="bold",
-                        size=12,
-                        color=ft.colors.BLUE_GREY_900,
-                        text_align=ft.TextAlign.CENTER,
-                    ),
+                    ft.Text(titulo, weight="bold", size=12, color=ft.colors.BLUE_GREY_900, text_align=ft.TextAlign.CENTER),
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 alignment=ft.MainAxisAlignment.CENTER,
@@ -256,12 +246,7 @@ def main(page: ft.Page):
             [
                 header_dashboard,
                 ft.Container(
-                    content=ft.Column(
-                        [
-                            ft.Text("Acesso Rápido", size=18, weight="bold", color=ft.colors.BLUE_GREY_800),
-                            grid_dashboard,
-                        ]
-                    ),
+                    content=ft.Column([ft.Text("Acesso Rápido", size=18, weight="bold", color=ft.colors.BLUE_GREY_800), grid_dashboard]),
                     padding=25,
                 ),
             ]
@@ -271,7 +256,7 @@ def main(page: ft.Page):
     )
 
     # ==========================================
-    # 6. MÓDULO: RESERVAS
+    # MÓDULO: RESERVAS
     # ==========================================
     estilo_campo = {
         "border_radius": 12,
@@ -286,11 +271,7 @@ def main(page: ft.Page):
     campo_espaco = ft.Dropdown(
         label="1. Escolha o Espaço",
         prefix=ft.Icon(ft.icons.HOME_WORK, color=ft.colors.CYAN_700),
-        options=[
-            ft.dropdown.Option("Salão de Festas"),
-            ft.dropdown.Option("Churrasqueira"),
-            ft.dropdown.Option("Quadra Poliesportiva"),
-        ],
+        options=[ft.dropdown.Option("Salão de Festas"), ft.dropdown.Option("Churrasqueira"), ft.dropdown.Option("Quadra Poliesportiva")],
         **estilo_campo,
     )
 
@@ -311,19 +292,13 @@ def main(page: ft.Page):
     )
 
     def verificar_turnos_disponiveis(e=None):
-        if not campo_espaco.value or not campo_data_reserva.value:
-            return
-        turnos_ocupados = banco_dados.verificar_disponibilidade_turnos(
-            campo_espaco.value, campo_data_reserva.value
-        )
+        if not campo_espaco.value or not campo_data_reserva.value: return
+        turnos_ocupados = banco_dados.verificar_disponibilidade_turnos(campo_espaco.value, campo_data_reserva.value)
         opcoes_padrao = ["Manhã (08h - 12h)", "Tarde (13h - 17h)", "Noite (18h - 22h)"]
-        novas_opcoes = []
-        for turno in opcoes_padrao:
-            if turno in turnos_ocupados:
-                novas_opcoes.append(ft.dropdown.Option(key=turno, text=f"🔴 Ocupado: {turno}", disabled=True))
-            else:
-                novas_opcoes.append(ft.dropdown.Option(key=turno, text=f"✅ Livre: {turno}"))
-        campo_horario.options = novas_opcoes
+        campo_horario.options = [
+            ft.dropdown.Option(key=t, text=f"🔴 Ocupado: {t}" if t in turnos_ocupados else f"✅ Livre: {t}", disabled=(t in turnos_ocupados))
+            for t in opcoes_padrao
+        ]
         campo_horario.value = None
         page.update()
 
@@ -348,58 +323,38 @@ def main(page: ft.Page):
             page.snack_bar.open = True
             page.update()
             return
-        sucesso = banco_dados.adicionar_reserva(campo_espaco.value, campo_data_reserva.value, campo_horario.value, unidade_logada)
-        if sucesso:
-            page.snack_bar = ft.SnackBar(ft.Text("Solicitação enviada ao Síndico!"), bgcolor="green")
-            campo_espaco.value = None
-            campo_data_reserva.value = ""
-            campo_horario.value = None
-            carregar_reservas_morador()
+        if banco_dados.adicionar_reserva(campo_espaco.value, campo_data_reserva.value, campo_horario.value, unidade_logada):
+            page.snack_bar = ft.SnackBar(ft.Text("Solicitação enviada!"), bgcolor="green")
+            campo_espaco.value = None; campo_data_reserva.value = ""; campo_horario.value = None; carregar_reservas_morador()
         else:
-            page.snack_bar = ft.SnackBar(ft.Text("Opa! Alguém foi mais rápido e já reservou!"), bgcolor="red")
-        page.snack_bar.open = True
-        page.update()
+            page.snack_bar = ft.SnackBar(ft.Text("Horário já ocupado!"), bgcolor="red")
+        page.snack_bar.open = True; page.update()
 
     def cancelar_reserva_ui(id_res):
         banco_dados.cancelar_reserva_morador(id_res, unidade_logada)
-        page.snack_bar = ft.SnackBar(ft.Text("Reserva cancelada!"), bgcolor=ft.colors.ORANGE_700)
-        page.snack_bar.open = True
-        carregar_reservas_morador()
+        page.snack_bar = ft.SnackBar(ft.Text("Cancelada!"), bgcolor=ft.colors.ORANGE_700)
+        page.snack_bar.open = True; carregar_reservas_morador()
 
     def carregar_reservas_morador():
         lista_minhas_reservas.controls.clear()
         reservas = banco_dados.listar_reservas(unidade_filtro=unidade_logada)
-        if not reservas:
-            lista_minhas_reservas.controls.append(ft.Container(padding=20, content=ft.Text("Você não tem agendamentos.", italic=True, color="grey")))
         for res in reservas:
             id_r, esp, dat, hor, uni, stat = res
-            cor_st = ft.colors.AMBER_600 if stat == "Pendente" else (ft.colors.GREEN_600 if stat == "Aprovada" else ft.colors.RED_600)
-            icone_st = ft.icons.SCHEDULE if stat == "Pendente" else (ft.icons.CHECK_CIRCLE if stat == "Aprovada" else ft.icons.CANCEL)
-            btn_cancelar = ft.IconButton(ft.icons.DELETE_OUTLINE, icon_color="red", on_click=lambda e, i=id_r: cancelar_reserva_ui(i)) if stat != "Rejeitada" else ft.Container()
-
+            cor = ft.colors.AMBER_600 if stat == "Pendente" else (ft.colors.GREEN_600 if stat == "Aprovada" else ft.colors.RED_600)
             lista_minhas_reservas.controls.append(ft.Container(
-                bgcolor="white", padding=15, border_radius=12,
-                border=ft.border.only(left=ft.border.BorderSide(6, cor_st)),
+                bgcolor="white", padding=15, border_radius=12, border=ft.border.only(left=ft.border.BorderSide(6, cor)),
                 content=ft.Row([
-                    ft.Column([
-                        ft.Text(esp, weight="bold", size=15),
-                        ft.Text(f"{dat} | {hor}", size=12),
-                        ft.Row([ft.Icon(icone_st, color=cor_st, size=14), ft.Text(stat.upper(), color=cor_st, weight="bold", size=11)])
-                    ], expand=True),
-                    btn_cancelar
+                    ft.Column([ft.Text(esp, weight="bold"), ft.Text(f"{dat} | {hor}", size=12), ft.Text(stat.upper(), color=cor, weight="bold", size=11)], expand=True),
+                    ft.IconButton(ft.icons.DELETE_OUTLINE, icon_color="red", on_click=lambda e, i=id_r: cancelar_reserva_ui(i)) if stat != "Rejeitada" else ft.Container()
                 ])
             ))
         
         lista_agenda_publica.controls.clear()
-        agenda = banco_dados.listar_agenda_publica()
-        for ag in agenda:
-            lista_agenda_publica.controls.append(ft.Card(content=ft.Container(padding=15, content=ft.Column([
-                ft.Text(ag[0], weight="bold", color=ft.colors.CYAN_900),
-                ft.Text(f"{ag[1]} • {ag[2]}", size=13),
-                ft.Text(f"Reservado por: {ag[3]}", size=11, italic=True)
-            ]))))
+        for ag in banco_dados.listar_agenda_publica():
+            lista_agenda_publica.controls.append(ft.Card(content=ft.Container(padding=15, content=ft.Column([ft.Text(ag[0], weight="bold"), ft.Text(f"{ag[1]} • {ag[2]}", size=13), ft.Text(f"Unidade: {ag[3]}", size=11, italic=True)]))))
         page.update()
 
+    # Layout das Abas
     aba_minhas = ft.Container(padding=ft.padding.only(top=15), content=ft.Column([
         ft.Container(bgcolor="white", padding=25, border_radius=15, content=ft.Column([
             ft.Text("Agendar Espaço", size=18, weight="bold"),
@@ -420,18 +375,13 @@ def main(page: ft.Page):
     ], expand=True), padding=10, expand=True, visible=False)
 
     # ==========================================
-    # OUTROS MÓDULOS (Estatuto, Ouvidoria, etc.)
+    # OUTROS MÓDULOS
     # ==========================================
     lista_regras_ui = ft.ListView(expand=True, spacing=10)
     def carregar_estatuto_morador():
         lista_regras_ui.controls.clear()
-        regras = banco_dados.listar_estatuto()
-        for r in regras:
-            lista_regras_ui.controls.append(ft.ExpansionTile(
-                title=ft.Text(r[1], weight="bold"),
-                leading=ft.Icon(ft.icons.GAVEL),
-                controls=[ft.Container(padding=15, content=ft.Text(r[2]))]
-            ))
+        for r in banco_dados.listar_estatuto():
+            lista_regras_ui.controls.append(ft.ExpansionTile(title=ft.Text(r[1], weight="bold"), leading=ft.Icon(ft.icons.GAVEL), controls=[ft.Container(padding=15, content=ft.Text(r[2]))]))
         page.update()
 
     tela_estatuto = ft.Container(content=ft.Column([ft.Text("Manual do Condomínio", size=22, weight="bold"), lista_regras_ui]), padding=15, expand=True, visible=False)
@@ -441,9 +391,8 @@ def main(page: ft.Page):
 
     def carregar_documentos_morador():
         coluna_pastas.controls.clear()
-        docs = banco_dados.listar_documentos()
-        for d in docs:
-            coluna_pastas.controls.append(ft.ListTile(leading=ft.Icon(ft.icons.PICTURE_AS_PDF), title=ft.Text(f"{d[2]} - {d[3]}")))
+        for d in banco_dados.listar_documentos():
+            coluna_pastas.controls.append(ft.ListTile(leading=ft.Icon(ft.icons.PICTURE_AS_PDF, color="red"), title=ft.Text(f"{d[2]} - {d[3]}")))
         page.update()
 
     cat_input = ft.Dropdown(label="Assunto", options=[ft.dropdown.Option("Reclamação"), ft.dropdown.Option("Manutenção")], expand=True)
@@ -457,15 +406,13 @@ def main(page: ft.Page):
 
     def carregar_historico_premium():
         lista_chamados_ui.controls.clear()
-        chamados = banco_dados.listar_chamados(unidade_filtro=unidade_logada)
-        for ch in chamados:
-            lista_chamados_ui.controls.append(ft.Container(bgcolor="white", padding=20, content=ft.Text(f"{ch[4]}: {ch[5]}")))
+        for ch in banco_dados.listar_chamados(unidade_filtro=unidade_logada):
+            lista_chamados_ui.controls.append(ft.Container(bgcolor="white", padding=20, border_radius=10, content=ft.Text(f"{ch[4]}: {ch[5]}")))
         page.update()
 
     tela_ouvidoria = ft.Container(content=ft.Column([
         ft.Text("Fale com o Síndico", size=18, weight="bold"),
-        cat_input, texto_input,
-        ft.ElevatedButton("Enviar", on_click=abrir_novo_chamado_premium),
+        cat_input, texto_input, ft.ElevatedButton("Enviar", on_click=abrir_novo_chamado_premium),
         lista_chamados_ui
     ]), padding=15, expand=True, visible=False)
 
@@ -474,9 +421,8 @@ def main(page: ft.Page):
     
     def carregar_lista_assembleias():
         lista_ass_ui.controls.clear()
-        assembleias = banco_dados.listar_assembleias()
-        for ass in assembleias:
-            lista_ass_ui.controls.append(ft.Card(content=ft.Container(padding=15, on_click=lambda e, i=ass[0]: abrir_pautas_da_assembleia(i, ass[1], ass[3]), content=ft.Text(ass[1]))))
+        for ass in banco_dados.listar_assembleias():
+            lista_ass_ui.controls.append(ft.Card(content=ft.Container(padding=15, on_click=lambda e, i=ass[0]: abrir_pautas_da_assembleia(i, ass[1], ass[3]), content=ft.Text(ass[1], weight="bold"))))
         page.update()
 
     lista_pautas_ui = ft.ListView(expand=True, spacing=15)
@@ -484,8 +430,7 @@ def main(page: ft.Page):
 
     def abrir_pautas_da_assembleia(id_ass, titulo, status):
         lista_pautas_ui.controls.clear()
-        pautas = banco_dados.listar_pautas_da_assembleia(id_ass)
-        for p in pautas:
+        for p in banco_dados.listar_pautas_da_assembleia(id_ass):
             lista_pautas_ui.controls.append(ft.Card(content=ft.Container(padding=20, content=ft.Column([ft.Text(p[1], weight="bold"), ft.Text(p[2])]))))
         esconder_tudo(); tela_pautas_assembleia.visible = True; page.update()
 
@@ -494,12 +439,13 @@ def main(page: ft.Page):
 
     def carregar_obras_morador():
         lista_obras_ui.controls.clear()
-        obras = banco_dados.listar_obras()
-        for ob in obras:
-            lista_obras_ui.controls.append(ft.Card(content=ft.Container(padding=20, content=ft.Text(ob[1]))))
+        for ob in banco_dados.listar_obras():
+            lista_obras_ui.controls.append(ft.Card(content=ft.Container(padding=20, content=ft.Text(ob[1], weight="bold"))))
         page.update()
 
+    # Adicionando telas
     page.add(tela_login, tela_dashboard, tela_documentos, tela_ouvidoria, tela_lista_assembleias, tela_pautas_assembleia, tela_obras, tela_reservas, tela_estatuto)
 
+# Ponto de entrada Web
 porta = int(os.environ.get("PORT", 8080))
 ft.app(target=main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir=ASSETS_DIR)
