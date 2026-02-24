@@ -1478,4 +1478,5 @@ def main(page: ft.Page):
     )
 
 
-ft.app(target=main, assets_dir=ASSETS_DIR)
+porta = int(os.environ.get("PORT", 8080))
+ft.app(target=main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir=ASSETS_DIR)
