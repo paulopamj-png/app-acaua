@@ -1,17 +1,27 @@
 import flet as ft
 import banco_dados
 import os
+import platform
+import subprocess
 import datetime
 
-# Diretórios ajustados para o servidor
 DIRETORIO_ATUAL = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(DIRETORIO_ATUAL, "assets")
+
+# ADAPTAÇÃO WEB: As duas pastas de documentos precisam ficar dentro de "assets" 
+# para que o servidor da internet permita que o morador acesse os PDFs.
+DIR_CONTAS = os.path.join(ASSETS_DIR, "Prestacao_Contas")
+DIR_RELATORIOS = os.path.join(ASSETS_DIR, "Relatorios_Gerados")
+
 
 def main(page: ft.Page):
     page.title = "App do Condômino - Acauã"
     page.theme_mode = ft.ThemeMode.LIGHT
-    # page.window.width = 400  -> Removido para compatibilidade Web
-    # page.window.height = 750 -> Removido para compatibilidade Web
+    
+    # ADAPTAÇÃO WEB: Removido controle de tamanho de janela (o navegador decide)
+    # page.window.width = 400
+    # page.window.height = 750
+    
     page.bgcolor = "#F4F7FC"
     page.padding = 0
 
@@ -19,7 +29,7 @@ def main(page: ft.Page):
     nome_logado = ""
 
     # ==========================================
-    # ROTAS E NAVEGAÇÃO
+    # ROTAS E NAVEGAÇÃO MOBILE
     # ==========================================
     def esconder_tudo():
         tela_login.visible = False
@@ -98,18 +108,18 @@ def main(page: ft.Page):
         carregar_estatuto_morador()
         page.update()
 
-    # Correção AppBar: Inicialização segura
+    # ADAPTAÇÃO WEB: Criar a barra e depois ocultá-la (evita erro de inicialização)
     page.appbar = ft.AppBar(bgcolor=ft.colors.TEAL_700, elevation=0)
     page.appbar.visible = False
-    
+
     # ==========================================
-    # 1. LOGIN E DASHBOARD
+    # 1. LOGIN E DASHBOARD FINTECH
     # ==========================================
     def formatar_cpf(e):
         v = "".join(filter(str.isdigit, e.control.value))[:11]
         r = ""
         for i, c in enumerate(v):
-            if i == 3 or i == 6: r += "."
+            if i in [3, 6]: r += "."
             elif i == 9: r += "-"
             r += c
         e.control.value = r
@@ -143,10 +153,9 @@ def main(page: ft.Page):
             page.snack_bar.open = True
             page.update()
             return
-        
-        cpf_limpo = "".join(filter(str.isdigit, campo_cpf.value))
-        nome = banco_dados.validar_login_morador(cpf_limpo, campo_unidade.value)
-        
+        nome = banco_dados.validar_login_morador(
+            "".join(filter(str.isdigit, campo_cpf.value)), campo_unidade.value
+        )
         if nome:
             nome_logado = nome
             unidade_logada = campo_unidade.value
@@ -160,7 +169,12 @@ def main(page: ft.Page):
         content=ft.Column(
             [
                 ft.Icon(ft.icons.SECURITY, size=80, color=ft.colors.TEAL_700),
-                ft.Text("Portal do Morador", size=26, weight="bold", color=ft.colors.TEAL_900),
+                ft.Text(
+                    "Portal do Morador",
+                    size=26,
+                    weight="bold",
+                    color=ft.colors.TEAL_900,
+                ),
                 ft.Container(height=20),
                 campo_cpf,
                 campo_unidade,
@@ -174,8 +188,8 @@ def main(page: ft.Page):
                     height=50,
                 ),
             ],
-            alignment=ft.MainAxisAlignment.CENTER,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            alignment="center",
+            horizontal_alignment="center",
         ),
         alignment=ft.alignment.center,
         expand=True,
@@ -184,7 +198,6 @@ def main(page: ft.Page):
     saudacao_nome = ft.Text("", size=22, weight="bold", color="white")
     saudacao_unidade = ft.Text("", size=14, color=ft.colors.TEAL_100)
     letra_avatar = ft.Text("", size=24, weight="bold", color=ft.colors.TEAL_900)
-    
     header_dashboard = ft.Container(
         padding=ft.padding.only(top=50, left=30, right=30, bottom=30),
         gradient=ft.LinearGradient(
@@ -198,9 +211,11 @@ def main(page: ft.Page):
                 ft.CircleAvatar(content=letra_avatar, bgcolor="white", radius=30),
                 ft.Container(width=10),
                 ft.Column([saudacao_nome, saudacao_unidade], spacing=2, expand=True),
-                ft.IconButton(ft.icons.LOGOUT, icon_color="white", on_click=ir_para_login),
+                ft.IconButton(
+                    ft.icons.LOGOUT, icon_color="white", on_click=ir_para_login
+                ),
             ],
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            vertical_alignment="center",
         ),
     )
 
@@ -210,7 +225,9 @@ def main(page: ft.Page):
             bgcolor="white",
             border_radius=20,
             padding=20,
-            shadow=ft.BoxShadow(blur_radius=10, color=ft.colors.BLACK12, offset=ft.Offset(0, 4)),
+            shadow=ft.BoxShadow(
+                blur_radius=10, color=ft.colors.BLACK12, offset=ft.Offset(0, 4)
+            ),
             content=ft.Column(
                 [
                     ft.Container(
@@ -220,22 +237,49 @@ def main(page: ft.Page):
                         border_radius=50,
                     ),
                     ft.Container(height=5),
-                    ft.Text(titulo, weight="bold", size=12, color=ft.colors.BLUE_GREY_900, text_align=ft.TextAlign.CENTER),
+                    ft.Text(
+                        titulo,
+                        weight="bold",
+                        size=12,
+                        color=ft.colors.BLUE_GREY_900,
+                        text_align="center",
+                    ),
                 ],
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment="center",
+                alignment="center",
             ),
             col={"xs": 4},
         )
 
     grid_dashboard = ft.ResponsiveRow(
         controls=[
-            criar_cartao_premium("Assembleias", ft.icons.HOW_TO_VOTE, ft.colors.TEAL_600, ir_para_assembleias),
-            criar_cartao_premium("Ouvidoria", ft.icons.FORUM, ft.colors.PURPLE_600, ir_para_ouvidoria),
-            criar_cartao_premium("Documentos", ft.icons.FOLDER_SPECIAL, ft.colors.RED_600, ir_para_documentos),
-            criar_cartao_premium("Priorizar", ft.icons.LOW_PRIORITY, ft.colors.ORANGE_600, ir_para_obras),
-            criar_cartao_premium("Reservas", ft.icons.EVENT_AVAILABLE, ft.colors.CYAN_600, ir_para_reservas),
-            criar_cartao_premium("Regras", ft.icons.MENU_BOOK, ft.colors.INDIGO_600, ir_para_estatuto),
+            criar_cartao_premium(
+                "Assembleias",
+                ft.icons.HOW_TO_VOTE,
+                ft.colors.TEAL_600,
+                ir_para_assembleias,
+            ),
+            criar_cartao_premium(
+                "Ouvidoria", ft.icons.FORUM, ft.colors.PURPLE_600, ir_para_ouvidoria
+            ),
+            criar_cartao_premium(
+                "Documentos",
+                ft.icons.FOLDER_SPECIAL,
+                ft.colors.RED_600,
+                ir_para_documentos,
+            ),
+            criar_cartao_premium(
+                "Priorizar", ft.icons.LOW_PRIORITY, ft.colors.ORANGE_600, ir_para_obras
+            ),
+            criar_cartao_premium(
+                "Reservas",
+                ft.icons.EVENT_AVAILABLE,
+                ft.colors.CYAN_600,
+                ir_para_reservas,
+            ),
+            criar_cartao_premium(
+                "Regras", ft.icons.MENU_BOOK, ft.colors.INDIGO_600, ir_para_estatuto
+            ),
         ],
         spacing=15,
         run_spacing=15,
@@ -246,7 +290,17 @@ def main(page: ft.Page):
             [
                 header_dashboard,
                 ft.Container(
-                    content=ft.Column([ft.Text("Acesso Rápido", size=18, weight="bold", color=ft.colors.BLUE_GREY_800), grid_dashboard]),
+                    content=ft.Column(
+                        [
+                            ft.Text(
+                                "Acesso Rápido",
+                                size=18,
+                                weight="bold",
+                                color=ft.colors.BLUE_GREY_800,
+                            ),
+                            grid_dashboard,
+                        ]
+                    ),
                     padding=25,
                 ),
             ]
@@ -256,7 +310,7 @@ def main(page: ft.Page):
     )
 
     # ==========================================
-    # MÓDULO: RESERVAS
+    # 6. MÓDULO: RESERVAS PREMIUM E AGENDA 📅
     # ==========================================
     estilo_campo = {
         "border_radius": 12,
@@ -271,7 +325,11 @@ def main(page: ft.Page):
     campo_espaco = ft.Dropdown(
         label="1. Escolha o Espaço",
         prefix=ft.Icon(ft.icons.HOME_WORK, color=ft.colors.CYAN_700),
-        options=[ft.dropdown.Option("Salão de Festas"), ft.dropdown.Option("Churrasqueira"), ft.dropdown.Option("Quadra Poliesportiva")],
+        options=[
+            ft.dropdown.Option("Salão de Festas"),
+            ft.dropdown.Option("Churrasqueira"),
+            ft.dropdown.Option("Quadra Poliesportiva"),
+        ],
         **estilo_campo,
     )
 
@@ -292,17 +350,30 @@ def main(page: ft.Page):
     )
 
     def verificar_turnos_disponiveis(e=None):
-        if not campo_espaco.value or not campo_data_reserva.value: return
-        turnos_ocupados = banco_dados.verificar_disponibilidade_turnos(campo_espaco.value, campo_data_reserva.value)
+        if not campo_espaco.value or not campo_data_reserva.value:
+            return
+        turnos_ocupados = banco_dados.verificar_disponibilidade_turnos(
+            campo_espaco.value, campo_data_reserva.value
+        )
         opcoes_padrao = ["Manhã (08h - 12h)", "Tarde (13h - 17h)", "Noite (18h - 22h)"]
-        campo_horario.options = [
-            ft.dropdown.Option(key=t, text=f"🔴 Ocupado: {t}" if t in turnos_ocupados else f"✅ Livre: {t}", disabled=(t in turnos_ocupados))
-            for t in opcoes_padrao
-        ]
+        novas_opcoes = []
+        for turno in opcoes_padrao:
+            if turno in turnos_ocupados:
+                novas_opcoes.append(
+                    ft.dropdown.Option(
+                        key=turno, text=f"🔴 Ocupado: {turno}", disabled=True
+                    )
+                )
+            else:
+                novas_opcoes.append(
+                    ft.dropdown.Option(key=turno, text=f"✅ Livre: {turno}")
+                )
+        campo_horario.options = novas_opcoes
         campo_horario.value = None
         page.update()
 
     campo_espaco.on_change = verificar_turnos_disponiveis
+
     cal_reserva = ft.DatePicker(first_date=datetime.datetime.now())
 
     def atualizar_data_reserva(e):
@@ -314,138 +385,1100 @@ def main(page: ft.Page):
     cal_reserva.on_change = atualizar_data_reserva
     page.overlay.append(cal_reserva)
 
-    lista_minhas_reservas = ft.Column(spacing=10, scroll=ft.ScrollMode.AUTO, expand=True)
+    lista_minhas_reservas = ft.Column(
+        spacing=10, scroll=ft.ScrollMode.AUTO, expand=True
+    )
     lista_agenda_publica = ft.Column(spacing=10, scroll=ft.ScrollMode.AUTO, expand=True)
 
     def solicitar_reserva(e):
-        if not campo_espaco.value or not campo_data_reserva.value or not campo_horario.value:
-            page.snack_bar = ft.SnackBar(ft.Text("Preencha todos os passos!"), bgcolor="red")
+        if (
+            not campo_espaco.value
+            or not campo_data_reserva.value
+            or not campo_horario.value
+        ):
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Preencha todos os passos!"), bgcolor="red"
+            )
             page.snack_bar.open = True
             page.update()
             return
-        if banco_dados.adicionar_reserva(campo_espaco.value, campo_data_reserva.value, campo_horario.value, unidade_logada):
-            page.snack_bar = ft.SnackBar(ft.Text("Solicitação enviada!"), bgcolor="green")
-            campo_espaco.value = None; campo_data_reserva.value = ""; campo_horario.value = None; carregar_reservas_morador()
+
+        sucesso = banco_dados.adicionar_reserva(
+            campo_espaco.value,
+            campo_data_reserva.value,
+            campo_horario.value,
+            unidade_logada,
+        )
+        if sucesso:
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Solicitação enviada ao Síndico!"), bgcolor="green"
+            )
+            campo_espaco.value = None
+            campo_data_reserva.value = ""
+            campo_horario.value = None
+            carregar_reservas_morador()
         else:
-            page.snack_bar = ft.SnackBar(ft.Text("Horário já ocupado!"), bgcolor="red")
-        page.snack_bar.open = True; page.update()
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Opa! Alguém foi mais rápido e já reservou!"), bgcolor="red"
+            )
+        page.snack_bar.open = True
+        page.update()
 
     def cancelar_reserva_ui(id_res):
         banco_dados.cancelar_reserva_morador(id_res, unidade_logada)
-        page.snack_bar = ft.SnackBar(ft.Text("Cancelada!"), bgcolor=ft.colors.ORANGE_700)
-        page.snack_bar.open = True; carregar_reservas_morador()
+        page.snack_bar = ft.SnackBar(
+            ft.Text("Reserva cancelada e data libertada!"), bgcolor=ft.colors.ORANGE_700
+        )
+        page.snack_bar.open = True
+        carregar_reservas_morador()
 
     def carregar_reservas_morador():
         lista_minhas_reservas.controls.clear()
         reservas = banco_dados.listar_reservas(unidade_filtro=unidade_logada)
+        if not reservas:
+            lista_minhas_reservas.controls.append(
+                ft.Container(
+                    padding=20,
+                    content=ft.Text(
+                        "Você não tem agendamentos.", italic=True, color="grey"
+                    ),
+                )
+            )
         for res in reservas:
-            id_r, esp, dat, hor, uni, stat = res
-            cor = ft.colors.AMBER_600 if stat == "Pendente" else (ft.colors.GREEN_600 if stat == "Aprovada" else ft.colors.RED_600)
-            lista_minhas_reservas.controls.append(ft.Container(
-                bgcolor="white", padding=15, border_radius=12, border=ft.border.only(left=ft.border.BorderSide(6, cor)),
-                content=ft.Row([
-                    ft.Column([ft.Text(esp, weight="bold"), ft.Text(f"{dat} | {hor}", size=12), ft.Text(stat.upper(), color=cor, weight="bold", size=11)], expand=True),
-                    ft.IconButton(ft.icons.DELETE_OUTLINE, icon_color="red", on_click=lambda e, i=id_r: cancelar_reserva_ui(i)) if stat != "Rejeitada" else ft.Container()
-                ])
-            ))
-        
+            id_r, espaco, data_r, hor, uni, stat = res
+            cor_st = (
+                ft.colors.AMBER_600
+                if stat == "Pendente"
+                else (ft.colors.GREEN_600 if stat == "Aprovada" else ft.colors.RED_600)
+            )
+            icone_st = (
+                ft.icons.SCHEDULE
+                if stat == "Pendente"
+                else (ft.icons.CHECK_CIRCLE if stat == "Aprovada" else ft.icons.CANCEL)
+            )
+
+            btn_cancelar = (
+                ft.IconButton(
+                    ft.icons.DELETE_OUTLINE,
+                    icon_color="red",
+                    tooltip="Cancelar Reserva",
+                    on_click=lambda e, i=id_r: cancelar_reserva_ui(i),
+                )
+                if stat != "Rejeitada"
+                else ft.Container()
+            )
+
+            card = ft.Container(
+                bgcolor="white",
+                padding=15,
+                border_radius=12,
+                border=ft.border.only(left=ft.border.BorderSide(6, cor_st)),
+                shadow=ft.BoxShadow(
+                    blur_radius=5, color=ft.colors.BLACK12, offset=ft.Offset(0, 2)
+                ),
+                content=ft.Row(
+                    [
+                        ft.Column(
+                            [
+                                ft.Text(
+                                    espaco,
+                                    weight="bold",
+                                    size=15,
+                                    color=ft.colors.BLUE_GREY_900,
+                                ),
+                                ft.Text(
+                                    f"{data_r} | {hor}",
+                                    size=12,
+                                    color=ft.colors.BLUE_GREY_600,
+                                ),
+                                ft.Row(
+                                    [
+                                        ft.Icon(icone_st, color=cor_st, size=14),
+                                        ft.Text(
+                                            stat.upper(),
+                                            color=cor_st,
+                                            weight="bold",
+                                            size=11,
+                                        ),
+                                    ]
+                                ),
+                            ],
+                            expand=True,
+                        ),
+                        btn_cancelar,
+                    ]
+                ),
+            )
+            lista_minhas_reservas.controls.append(card)
+
         lista_agenda_publica.controls.clear()
-        for ag in banco_dados.listar_agenda_publica():
-            lista_agenda_publica.controls.append(ft.Card(content=ft.Container(padding=15, content=ft.Column([ft.Text(ag[0], weight="bold"), ft.Text(f"{ag[1]} • {ag[2]}", size=13), ft.Text(f"Unidade: {ag[3]}", size=11, italic=True)]))))
+        agenda_todos = banco_dados.listar_agenda_publica()
+
+        try:
+            agenda_todos.sort(
+                key=lambda x: datetime.datetime.strptime(x[1], "%d/%m/%Y")
+            )
+        except:
+            pass
+
+        if not agenda_todos:
+            lista_agenda_publica.controls.append(
+                ft.Container(
+                    padding=40,
+                    alignment=ft.alignment.center,
+                    content=ft.Column(
+                        [
+                            ft.Icon(
+                                ft.icons.EVENT_BUSY, size=50, color=ft.colors.GREY_300
+                            ),
+                            ft.Text(
+                                "Nenhum evento agendado no condomínio.",
+                                italic=True,
+                                color=ft.colors.GREY_500,
+                            ),
+                        ],
+                        horizontal_alignment="center",
+                    ),
+                )
+            )
+
+        for ag in agenda_todos:
+            espaco_ag, data_ag, hor_ag, uni_ag = ag
+            card_ag = ft.Card(
+                elevation=2,
+                content=ft.Container(
+                    padding=15,
+                    border_radius=8,
+                    border=ft.border.all(1, ft.colors.CYAN_100),
+                    bgcolor=ft.colors.CYAN_50,
+                    content=ft.Row(
+                        [
+                            ft.Icon(
+                                ft.icons.CELEBRATION, color=ft.colors.CYAN_700, size=30
+                            ),
+                            ft.Container(width=10),
+                            ft.Column(
+                                [
+                                    ft.Text(
+                                        f"{espaco_ag}",
+                                        weight="bold",
+                                        size=15,
+                                        color=ft.colors.CYAN_900,
+                                    ),
+                                    ft.Text(
+                                        f"{data_ag} • {hor_ag}",
+                                        size=13,
+                                        color=ft.colors.BLUE_GREY_700,
+                                    ),
+                                    ft.Text(
+                                        f"Reservado por: {uni_ag}",
+                                        size=11,
+                                        color=ft.colors.GREY_600,
+                                        italic=True,
+                                    ),
+                                ]
+                            ),
+                        ]
+                    ),
+                ),
+            )
+            lista_agenda_publica.controls.append(card_ag)
+
         page.update()
 
-    # Layout das Abas
-    aba_minhas = ft.Container(padding=ft.padding.only(top=15), content=ft.Column([
-        ft.Container(bgcolor="white", padding=25, border_radius=15, content=ft.Column([
-            ft.Text("Agendar Espaço", size=18, weight="bold"),
-            campo_espaco,
-            ft.Row([campo_data_reserva, ft.IconButton(ft.icons.CALENDAR_MONTH, on_click=lambda e: page.open(cal_reserva))]),
-            campo_horario,
-            ft.ElevatedButton("Enviar Solicitação", bgcolor=ft.colors.CYAN_700, color="white", on_click=solicitar_reserva, width=400)
-        ])),
-        ft.Text("Meus Pedidos", weight="bold", size=16),
-        lista_minhas_reservas
-    ], scroll=ft.ScrollMode.AUTO))
+    cartao_nova_reserva = ft.Container(
+        bgcolor="white",
+        padding=25,
+        border_radius=15,
+        shadow=ft.BoxShadow(
+            blur_radius=15, color=ft.colors.BLACK12, offset=ft.Offset(0, 5)
+        ),
+        content=ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.Container(
+                            content=ft.Icon(
+                                ft.icons.EVENT_AVAILABLE,
+                                color=ft.colors.CYAN_700,
+                                size=24,
+                            ),
+                            padding=10,
+                            bgcolor=ft.colors.CYAN_50,
+                            border_radius=50,
+                        ),
+                        ft.Column(
+                            [
+                                ft.Text(
+                                    "Agendar Espaço",
+                                    size=18,
+                                    weight="bold",
+                                    color=ft.colors.BLUE_GREY_900,
+                                ),
+                                ft.Text(
+                                    "Confira a agenda e faça sua reserva.",
+                                    color=ft.colors.BLUE_GREY_500,
+                                    size=12,
+                                ),
+                            ]
+                        ),
+                    ]
+                ),
+                ft.Divider(height=25, color=ft.colors.GREY_200),
+                campo_espaco,
+                ft.Row(
+                    [
+                        campo_data_reserva,
+                        ft.IconButton(
+                            icon=ft.icons.CALENDAR_MONTH,
+                            icon_size=35,
+                            icon_color=ft.colors.CYAN_700,
+                            on_click=lambda e: page.open(cal_reserva),
+                        ),
+                    ]
+                ),
+                campo_horario,
+                ft.Container(height=5),
+                ft.ElevatedButton(
+                    "Enviar Solicitação",
+                    icon=ft.icons.SEND,
+                    bgcolor=ft.colors.CYAN_700,
+                    color="white",
+                    on_click=solicitar_reserva,
+                    height=45,
+                    width=400,
+                ),
+            ]
+        ),
+    )
 
-    aba_agenda = ft.Container(padding=15, content=ft.Column([ft.Text("Agenda Oficial", weight="bold", size=18), lista_agenda_publica], scroll=ft.ScrollMode.AUTO))
+    aba_minhas = ft.Container(
+        padding=ft.padding.only(top=15),
+        content=ft.Column(
+            [
+                cartao_nova_reserva,
+                ft.Text("Meus Pedidos", weight="bold", size=16),
+                lista_minhas_reservas,
+            ],
+            scroll=ft.ScrollMode.AUTO,
+        ),
+    )
+    aba_agenda = ft.Container(
+        padding=ft.padding.only(top=15),
+        content=ft.Column(
+            [
+                ft.Text(
+                    "Agenda Oficial do Condomínio",
+                    weight="bold",
+                    size=18,
+                    color=ft.colors.CYAN_900,
+                ),
+                ft.Text(
+                    "Fique por dentro de quais áreas comuns estarão ocupadas nos próximos dias.",
+                    color="grey",
+                    size=13,
+                ),
+                ft.Divider(),
+                lista_agenda_publica,
+            ],
+            scroll=ft.ScrollMode.AUTO,
+        ),
+    )
 
-    tela_reservas = ft.Container(content=ft.Tabs(tabs=[
-        ft.Tab(text="Fazer Reserva", icon=ft.icons.ADD_ALARM, content=aba_minhas),
-        ft.Tab(text="Agenda Pública", icon=ft.icons.CALENDAR_TODAY, content=aba_agenda),
-    ], expand=True), padding=10, expand=True, visible=False)
+    tela_reservas = ft.Container(
+        content=ft.Tabs(
+            selected_index=0,
+            animation_duration=300,
+            tabs=[
+                ft.Tab(
+                    text="Fazer Reserva", icon=ft.icons.ADD_ALARM, content=aba_minhas
+                ),
+                ft.Tab(
+                    text="Agenda Pública",
+                    icon=ft.icons.CALENDAR_TODAY,
+                    content=aba_agenda,
+                ),
+            ],
+            expand=True,
+        ),
+        padding=10,
+        expand=True,
+        visible=False,
+    )
 
     # ==========================================
-    # OUTROS MÓDULOS
+    # NOVO MÓDULO: ESTATUTO / MANUAL 📖
     # ==========================================
     lista_regras_ui = ft.ListView(expand=True, spacing=10)
+
     def carregar_estatuto_morador():
         lista_regras_ui.controls.clear()
-        for r in banco_dados.listar_estatuto():
-            lista_regras_ui.controls.append(ft.ExpansionTile(title=ft.Text(r[1], weight="bold"), leading=ft.Icon(ft.icons.GAVEL), controls=[ft.Container(padding=15, content=ft.Text(r[2]))]))
+        regras = banco_dados.listar_estatuto()
+        if not regras:
+            lista_regras_ui.controls.append(
+                ft.Text("Nenhuma regra cadastrada pelo síndico.", italic=True)
+            )
+        for r in regras:
+            lista_regras_ui.controls.append(
+                ft.ExpansionTile(
+                    title=ft.Text(r[1], weight="bold", color=ft.colors.INDIGO_900),
+                    leading=ft.Icon(ft.icons.GAVEL, color=ft.colors.INDIGO_600),
+                    controls=[
+                        ft.Container(
+                            padding=15,
+                            bgcolor=ft.colors.INDIGO_50,
+                            content=ft.Text(r[2], size=14),
+                        )
+                    ],
+                )
+            )
         page.update()
 
-    tela_estatuto = ft.Container(content=ft.Column([ft.Text("Manual do Condomínio", size=22, weight="bold"), lista_regras_ui]), padding=15, expand=True, visible=False)
+    tela_estatuto = ft.Container(
+        content=ft.Column(
+            [
+                ft.Text(
+                    "Manual do Condomínio",
+                    size=22,
+                    weight="bold",
+                    color=ft.colors.INDIGO_900,
+                ),
+                ft.Text(
+                    "Conheça as regras e normas do nosso condomínio atualizadas pela gestão.",
+                    color="grey",
+                ),
+                ft.Divider(),
+                lista_regras_ui,
+            ]
+        ),
+        padding=15,
+        expand=True,
+        visible=False,
+    )
 
+    # ==========================================
+    # --- DOCUMENTOS ---
+    # ==========================================
     coluna_pastas = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO)
-    tela_documentos = ft.Container(content=ft.Column([ft.Text("Central de Transparência", size=22, weight="bold"), coluna_pastas]), padding=20, expand=True, visible=False)
+    tela_documentos = ft.Container(
+        content=ft.Column(
+            [
+                ft.Text(
+                    "Central de Transparência",
+                    size=22,
+                    weight="bold",
+                    color=ft.colors.RED_900,
+                ),
+                ft.Text(
+                    "Selecione a categoria para visualizar os PDFs oficiais.",
+                    color="grey",
+                ),
+                ft.Divider(),
+                coluna_pastas,
+            ]
+        ),
+        padding=20,
+        expand=True,
+        visible=False,
+    )
+
+    # ADAPTAÇÃO WEB: Nova função para abrir os PDFs através da URL do navegador
+    def abrir_pdf_web(subpasta, nome_arquivo):
+        try:
+            url_arquivo = f"/{subpasta}/{nome_arquivo}"
+            page.launch_url(url_arquivo)
+        except Exception as err:
+            page.snack_bar = ft.SnackBar(ft.Text(f"Erro ao abrir arquivo na nuvem."))
+            page.snack_bar.open = True
+            page.update()
 
     def carregar_documentos_morador():
         coluna_pastas.controls.clear()
-        for d in banco_dados.listar_documentos():
-            coluna_pastas.controls.append(ft.ListTile(leading=ft.Icon(ft.icons.PICTURE_AS_PDF, color="red"), title=ft.Text(f"{d[2]} - {d[3]}")))
+        docs = banco_dados.listar_documentos()
+        docs_mensais = ft.Column(spacing=5)
+        docs_anuais = ft.Column(spacing=5)
+        
+        for d in docs:
+            id_d, cat, per, tit, arq = d
+            lista_item = ft.ListTile(
+                leading=ft.Icon(ft.icons.PICTURE_AS_PDF, color="green"),
+                title=ft.Text(f"{per} - {tit}", weight="bold"),
+                subtitle=ft.Text("Toque para abrir"),
+                on_click=lambda e, a=arq: abrir_pdf_web("Prestacao_Contas", a),
+            )
+            if cat == "Prestação de Contas Mensal":
+                docs_mensais.controls.append(lista_item)
+            elif cat == "Prestação de Contas Anual":
+                docs_anuais.controls.append(lista_item)
+                
+        # Proteção extra para evitar erros se a pasta de Relatórios não existir
+        arquivos_auto = []
+        if os.path.exists(DIR_RELATORIOS):
+            arquivos_auto = [f for f in os.listdir(DIR_RELATORIOS) if f.endswith(".pdf")]
+            
+        assembleias_db = {str(a[0]): a[1] for a in banco_dados.listar_assembleias()}
+        docs_atas = ft.Column(spacing=5)
+        docs_obras = ft.Column(spacing=5)
+        
+        for arq in arquivos_auto:
+            if arq.startswith("Ata_Assembleia_"):
+                docs_atas.controls.append(
+                    ft.ListTile(
+                        leading=ft.Icon(ft.icons.GAVEL, color="red"),
+                        title=ft.Text(
+                            assembleias_db.get(
+                                arq.replace("Ata_Assembleia_", "").replace(".pdf", ""),
+                                "Ata",
+                            ),
+                            weight="bold",
+                        ),
+                        on_click=lambda e, a=arq: abrir_pdf_web("Relatorios_Gerados", a),
+                    )
+                )
+            elif arq.startswith("Ranking_Prioridades_"):
+                docs_obras.controls.append(
+                    ft.ListTile(
+                        leading=ft.Icon(ft.icons.INSERT_CHART, color="orange"),
+                        title=ft.Text("Relatório de Ranking", weight="bold"),
+                        on_click=lambda e, a=arq: abrir_pdf_web("Relatorios_Gerados", a),
+                    )
+                )
+                
+        coluna_pastas.controls.extend(
+            [
+                ft.ExpansionTile(
+                    title=ft.Text("Prestação de Contas Mensais", weight="bold"),
+                    leading=ft.Icon(ft.icons.FOLDER_OPEN, color="green"),
+                    controls=[
+                        ft.Container(
+                            padding=ft.padding.only(left=20),
+                            content=docs_mensais
+                            if docs_mensais.controls
+                            else ft.Text("Vazia", italic=True),
+                        )
+                    ],
+                ),
+                ft.ExpansionTile(
+                    title=ft.Text("Prestação de Contas Anuais", weight="bold"),
+                    leading=ft.Icon(ft.icons.FOLDER_SPECIAL, color="blue"),
+                    controls=[
+                        ft.Container(
+                            padding=ft.padding.only(left=20),
+                            content=docs_anuais
+                            if docs_anuais.controls
+                            else ft.Text("Vazia", italic=True),
+                        )
+                    ],
+                ),
+                ft.ExpansionTile(
+                    title=ft.Text("Atas de Assembleia (Resultados)", weight="bold"),
+                    leading=ft.Icon(ft.icons.LIBRARY_BOOKS, color="red"),
+                    controls=[
+                        ft.Container(
+                            padding=ft.padding.only(left=20),
+                            content=docs_atas
+                            if docs_atas.controls
+                            else ft.Text("Vazia", italic=True),
+                        )
+                    ],
+                ),
+                ft.ExpansionTile(
+                    title=ft.Text("Relatórios de Prioridades", weight="bold"),
+                    leading=ft.Icon(ft.icons.CONSTRUCTION, color="orange"),
+                    controls=[
+                        ft.Container(
+                            padding=ft.padding.only(left=20),
+                            content=docs_obras
+                            if docs_obras.controls
+                            else ft.Text("Vazia", italic=True),
+                        )
+                    ],
+                ),
+            ]
+        )
         page.update()
 
-    cat_input = ft.Dropdown(label="Assunto", options=[ft.dropdown.Option("Reclamação"), ft.dropdown.Option("Manutenção")], expand=True)
-    texto_input = ft.TextField(label="Descrição...", multiline=True, min_lines=3)
-    lista_chamados_ui = ft.Column(spacing=20, scroll=ft.ScrollMode.AUTO)
+    # --- OUVIDORIA ---
+    cat_input = ft.Dropdown(
+        label="Assunto",
+        border_radius=8,
+        options=[
+            ft.dropdown.Option("Reclamação"),
+            ft.dropdown.Option("Manutenção"),
+            ft.dropdown.Option("Sugestão"),
+            ft.dropdown.Option("Elogio"),
+        ],
+        expand=True,
+    )
+    texto_input = ft.TextField(
+        label="Descreva a situação detalhadamente...",
+        multiline=True,
+        min_lines=3,
+        border_radius=8,
+    )
 
     def abrir_novo_chamado_premium(e):
-        if not cat_input.value or not texto_input.value: return
-        banco_dados.criar_novo_chamado(cat_input.value, texto_input.value, unidade_logada)
-        cat_input.value = None; texto_input.value = ""; carregar_historico_premium()
+        if not cat_input.value or not texto_input.value:
+            page.snack_bar = ft.SnackBar(ft.Text("Preencha tudo!"), bgcolor="red")
+            page.snack_bar.open = True
+            page.update()
+            return
+        banco_dados.criar_novo_chamado(
+            cat_input.value, texto_input.value, unidade_logada
+        )
+        cat_input.value = None
+        texto_input.value = ""
+        page.snack_bar = ft.SnackBar(ft.Text("Chamado enviado!"), bgcolor="green")
+        page.snack_bar.open = True
+        carregar_historico_premium()
+
+    lista_chamados_ui = ft.Column(spacing=20, scroll=ft.ScrollMode.AUTO)
 
     def carregar_historico_premium():
         lista_chamados_ui.controls.clear()
-        for ch in banco_dados.listar_chamados(unidade_filtro=unidade_logada):
-            lista_chamados_ui.controls.append(ft.Container(bgcolor="white", padding=20, border_radius=10, content=ft.Text(f"{ch[4]}: {ch[5]}")))
+        chamados = banco_dados.listar_chamados(unidade_filtro=unidade_logada)
+        if not chamados:
+            lista_chamados_ui.controls.append(
+                ft.Container(
+                    padding=40,
+                    alignment=ft.alignment.center,
+                    content=ft.Column(
+                        [
+                            ft.Icon(ft.icons.INBOX, size=50, color=ft.colors.GREY_300),
+                            ft.Text(
+                                "Nenhum chamado no momento.",
+                                italic=True,
+                                color=ft.colors.GREY_500,
+                            ),
+                        ],
+                        horizontal_alignment="center",
+                    ),
+                )
+            )
+        for ch in chamados:
+            id_ch, uni, stat, data, cat, txt, resp = ch
+            c_cat = ft.colors.GREY_600
+            is_pendente = stat == "Pendente"
+            c_stat = (
+                ft.colors.RED_600
+                if is_pendente
+                else (
+                    ft.colors.GREEN_600 if stat == "Resolvido" else ft.colors.BLUE_600
+                )
+            )
+            badge_status = ft.Container(
+                padding=ft.padding.only(left=10, right=10, top=4, bottom=4),
+                border_radius=15,
+                bgcolor=ft.colors.RED_50 if is_pendente else ft.colors.GREEN_50,
+                border=ft.border.all(1, c_stat),
+                content=ft.Row(
+                    [
+                        ft.Icon(ft.icons.CIRCLE, size=8, color=c_stat),
+                        ft.Text(stat.upper(), size=11, weight="bold", color=c_stat),
+                    ]
+                ),
+            )
+            caixa_resposta = (
+                ft.Container(
+                    margin=ft.margin.only(top=15),
+                    padding=15,
+                    border_radius=10,
+                    border=ft.border.all(1, ft.colors.PURPLE_100),
+                    bgcolor=ft.colors.PURPLE_50,
+                    content=ft.Row(
+                        [
+                            ft.CircleAvatar(
+                                content=ft.Icon(
+                                    ft.icons.SUPPORT_AGENT, color="white", size=16
+                                ),
+                                bgcolor=ft.colors.PURPLE_400,
+                                radius=16,
+                            ),
+                            ft.Column(
+                                [
+                                    ft.Text(
+                                        "RESPOSTA DO SÍNDICO",
+                                        weight="bold",
+                                        color=ft.colors.PURPLE_900,
+                                        size=10,
+                                    ),
+                                    ft.Text(
+                                        resp, size=13, color=ft.colors.BLUE_GREY_900
+                                    ),
+                                ],
+                                expand=True,
+                            ),
+                        ],
+                        vertical_alignment="start",
+                    ),
+                )
+                if resp
+                else ft.Container()
+            )
+            cartao = ft.Container(
+                bgcolor="white",
+                padding=20,
+                border_radius=12,
+                border=ft.border.only(left=ft.border.BorderSide(6, c_cat)),
+                shadow=ft.BoxShadow(
+                    blur_radius=10, color=ft.colors.BLACK12, offset=ft.Offset(0, 4)
+                ),
+                content=ft.Column(
+                    [
+                        ft.Row(
+                            [
+                                ft.Text(
+                                    f"#{id_ch} • {data[:10]}",
+                                    color=ft.colors.GREY_400,
+                                    size=11,
+                                    weight="bold",
+                                )
+                            ]
+                        ),
+                        ft.Container(height=5),
+                        ft.Row(
+                            [
+                                ft.Text(
+                                    uni,
+                                    weight="bold",
+                                    color=ft.colors.BLUE_GREY_900,
+                                    size=16,
+                                ),
+                                ft.Container(expand=True),
+                                badge_status,
+                            ]
+                        ),
+                        ft.Container(
+                            padding=ft.padding.only(left=5),
+                            content=ft.Text(
+                                txt, size=14, color=ft.colors.BLUE_GREY_800
+                            ),
+                        ),
+                        caixa_resposta,
+                    ]
+                ),
+            )
+            lista_chamados_ui.controls.append(cartao)
         page.update()
 
-    tela_ouvidoria = ft.Container(content=ft.Column([
-        ft.Text("Fale com o Síndico", size=18, weight="bold"),
-        cat_input, texto_input, ft.ElevatedButton("Enviar", on_click=abrir_novo_chamado_premium),
-        lista_chamados_ui
-    ]), padding=15, expand=True, visible=False)
+    cartao_abrir_chamado = ft.Container(
+        bgcolor="white",
+        padding=25,
+        border_radius=15,
+        shadow=ft.BoxShadow(
+            blur_radius=15, color=ft.colors.BLACK12, offset=ft.Offset(0, 5)
+        ),
+        content=ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.Container(
+                            content=ft.Icon(
+                                ft.icons.HEADSET_MIC,
+                                color=ft.colors.PURPLE_700,
+                                size=24,
+                            ),
+                            padding=10,
+                            bgcolor=ft.colors.PURPLE_50,
+                            border_radius=50,
+                        ),
+                        ft.Column(
+                            [
+                                ft.Text(
+                                    "Fale com o Síndico",
+                                    size=18,
+                                    weight="bold",
+                                    color=ft.colors.BLUE_GREY_900,
+                                )
+                            ]
+                        ),
+                    ]
+                ),
+                ft.Divider(height=25, color=ft.colors.GREY_200),
+                ft.Row([cat_input]),
+                texto_input,
+                ft.Container(height=5),
+                ft.Row(
+                    [
+                        ft.ElevatedButton(
+                            "Enviar Mensagem",
+                            icon=ft.icons.SEND,
+                            bgcolor=ft.colors.PURPLE_700,
+                            color="white",
+                            on_click=abrir_novo_chamado_premium,
+                            height=45,
+                        )
+                    ],
+                    alignment="end",
+                ),
+            ]
+        ),
+    )
+    tela_ouvidoria = ft.Container(
+        content=ft.Column(
+            [
+                cartao_abrir_chamado,
+                ft.Text(
+                    "Seus Chamados",
+                    size=18,
+                    weight="bold",
+                    color=ft.colors.BLUE_GREY_900,
+                ),
+                lista_chamados_ui,
+            ]
+        ),
+        padding=15,
+        expand=True,
+        visible=False,
+    )
 
+    # --- ASSEMBLEIAS ---
     lista_ass_ui = ft.ListView(expand=True, spacing=10)
-    tela_lista_assembleias = ft.Container(content=ft.Column([ft.Text("Assembleias", size=18, weight="bold"), lista_ass_ui]), padding=15, expand=True, visible=False)
-    
+    tela_lista_assembleias = ft.Container(
+        content=ft.Column(
+            [
+                ft.Text(
+                    "Selecione a Assembleia",
+                    weight="bold",
+                    size=18,
+                    color=ft.colors.BLUE_GREY_900,
+                ),
+                lista_ass_ui,
+            ]
+        ),
+        padding=15,
+        expand=True,
+        visible=False,
+    )
+    lista_pautas_ui = ft.ListView(expand=True, spacing=15)
+    tela_pautas_assembleia = ft.Container(
+        content=ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.IconButton(
+                            ft.icons.ARROW_BACK,
+                            icon_color=ft.colors.BLUE_900,
+                            on_click=lambda e: (
+                                page.appbar.title._set_value("Assembleias"),
+                                esconder_tudo(),
+                                setattr(tela_lista_assembleias, "visible", True),
+                                page.update(),
+                            ),
+                        ),
+                        ft.Text(
+                            "Pautas em Deliberação",
+                            weight="bold",
+                            size=18,
+                            color=ft.colors.BLUE_900,
+                        ),
+                    ]
+                ),
+                lista_pautas_ui,
+            ]
+        ),
+        padding=10,
+        expand=True,
+        visible=False,
+    )
+
     def carregar_lista_assembleias():
         lista_ass_ui.controls.clear()
-        for ass in banco_dados.listar_assembleias():
-            lista_ass_ui.controls.append(ft.Card(content=ft.Container(padding=15, on_click=lambda e, i=ass[0]: abrir_pautas_da_assembleia(i, ass[1], ass[3]), content=ft.Text(ass[1], weight="bold"))))
+        assembleias = banco_dados.listar_assembleias()
+        if not assembleias:
+            lista_ass_ui.controls.append(
+                ft.Text("Nenhuma assembleia convocada.", text_align="center")
+            )
+        for ass in assembleias:
+            lista_ass_ui.controls.append(
+                ft.Card(
+                    elevation=3,
+                    content=ft.Container(
+                        padding=15,
+                        on_click=lambda e, i=ass[0], t=ass[1], s=ass[3]: (
+                            abrir_pautas_da_assembleia(i, t, s)
+                        ),
+                        ink=True,
+                        content=ft.Column(
+                            [
+                                ft.Row(
+                                    [
+                                        ft.Icon(
+                                            ft.icons.ACCOUNT_BALANCE,
+                                            color=ft.colors.TEAL_700,
+                                        ),
+                                        ft.Text(
+                                            ass[3].upper(),
+                                            color=ft.colors.GREEN_700
+                                            if ass[3] == "Aberta"
+                                            else ft.colors.RED_700,
+                                            weight="bold",
+                                            size=12,
+                                        ),
+                                    ],
+                                    alignment="spaceBetween",
+                                ),
+                                ft.Text(ass[1], weight="bold", size=16),
+                                ft.Text(f"Prazo: {ass[2]}", size=12, color="grey"),
+                            ]
+                        ),
+                    ),
+                )
+            )
         page.update()
 
-    lista_pautas_ui = ft.ListView(expand=True, spacing=15)
-    tela_pautas_assembleia = ft.Container(content=ft.Column([ft.IconButton(ft.icons.ARROW_BACK, on_click=ir_para_assembleias), lista_pautas_ui]), padding=10, expand=True, visible=False)
-
-    def abrir_pautas_da_assembleia(id_ass, titulo, status):
+    def abrir_pautas_da_assembleia(id_ass, titulo_ass, status_ass):
+        page.appbar.title.value = "Pautas"
         lista_pautas_ui.controls.clear()
-        for p in banco_dados.listar_pautas_da_assembleia(id_ass):
-            lista_pautas_ui.controls.append(ft.Card(content=ft.Container(padding=20, content=ft.Column([ft.Text(p[1], weight="bold"), ft.Text(p[2])]))))
-        esconder_tudo(); tela_pautas_assembleia.visible = True; page.update()
+        pautas = banco_dados.listar_pautas_da_assembleia(id_ass)
+        for p in pautas:
+            meu_voto = banco_dados.verificar_voto(p[0], unidade_logada)
+            area_votacao = ft.Column()
+            if status_ass != "Aberta":
+                area_votacao.controls.append(
+                    ft.Container(
+                        content=ft.Row(
+                            [
+                                ft.Icon(ft.icons.LOCK, color="red"),
+                                ft.Text(
+                                    "VOTAÇÃO ENCERRADA", weight="bold", color="red"
+                                ),
+                            ]
+                        ),
+                        bgcolor=ft.colors.RED_50,
+                        padding=10,
+                        border_radius=5,
+                        alignment=ft.alignment.center,
+                    )
+                )
+            elif meu_voto:
+                area_votacao.controls.append(
+                    ft.Container(
+                        content=ft.Column(
+                            [
+                                ft.Text(
+                                    "VOTO REGISTRADO:",
+                                    size=12,
+                                    weight="bold",
+                                    color=ft.colors.GREEN_900,
+                                ),
+                                ft.Row(
+                                    [
+                                        ft.Icon(ft.icons.CHECK_CIRCLE, color="green"),
+                                        ft.Text(
+                                            f'"{meu_voto.upper()}"',
+                                            color=ft.colors.GREEN_700,
+                                            weight="bold",
+                                            size=18,
+                                        ),
+                                    ],
+                                    alignment="center",
+                                ),
+                            ],
+                            horizontal_alignment="center",
+                        ),
+                        bgcolor=ft.colors.GREEN_50,
+                        padding=15,
+                        border_radius=8,
+                    )
+                )
+            else:
+                area_votacao.controls.append(
+                    ft.Container(
+                        padding=15,
+                        bgcolor=ft.colors.BLUE_GREY_50,
+                        border_radius=8,
+                        content=ft.Column(
+                            [
+                                ft.Text(
+                                    "CÉDULA DE VOTAÇÃO",
+                                    weight="bold",
+                                    color=ft.colors.BLUE_GREY_800,
+                                    text_align="center",
+                                ),
+                                ft.Column(
+                                    [
+                                        ft.ElevatedButton(
+                                            "APROVAR (SIM)",
+                                            icon=ft.icons.THUMB_UP,
+                                            bgcolor=ft.colors.GREEN_700,
+                                            color="white",
+                                            on_click=lambda e, i=p[0]: (
+                                                banco_dados.registrar_voto(
+                                                    i, unidade_logada, "Sim"
+                                                ),
+                                                abrir_pautas_da_assembleia(
+                                                    id_ass, titulo_ass, status_ass
+                                                ),
+                                            ),
+                                            width=300,
+                                        ),
+                                        ft.ElevatedButton(
+                                            "REJEITAR (NÃO)",
+                                            icon=ft.icons.THUMB_DOWN,
+                                            bgcolor=ft.colors.RED_700,
+                                            color="white",
+                                            on_click=lambda e, i=p[0]: (
+                                                banco_dados.registrar_voto(
+                                                    i, unidade_logada, "Não"
+                                                ),
+                                                abrir_pautas_da_assembleia(
+                                                    id_ass, titulo_ass, status_ass
+                                                ),
+                                            ),
+                                            width=300,
+                                        ),
+                                    ],
+                                    horizontal_alignment="center",
+                                ),
+                            ],
+                            horizontal_alignment="center",
+                        ),
+                    )
+                )
+            lista_pautas_ui.controls.append(
+                ft.Card(
+                    elevation=4,
+                    content=ft.Container(
+                        padding=20,
+                        border_radius=10,
+                        content=ft.Column(
+                            [
+                                ft.Text(
+                                    f"#{p[0]} - {p[1]}",
+                                    weight="bold",
+                                    size=18,
+                                    color=ft.colors.TEAL_900,
+                                ),
+                                ft.Text(p[2], size=14, color=ft.colors.BLACK87),
+                                ft.Container(height=10),
+                                ft.Image(
+                                    src=p[3], border_radius=8, fit=ft.ImageFit.COVER
+                                )
+                                if p[3]
+                                else ft.Container(),
+                                area_votacao,
+                            ]
+                        ),
+                    ),
+                )
+            )
+        esconder_tudo()
+        tela_pautas_assembleia.visible = True
+        page.update()
 
+    # --- OBRAS ---
     lista_obras_ui = ft.ListView(expand=True, spacing=15)
-    tela_obras = ft.Container(content=ft.Column([ft.Text("Prioridades", size=22, weight="bold"), lista_obras_ui]), padding=15, expand=True, visible=False)
+    tela_obras = ft.Container(
+        content=ft.Column(
+            [
+                ft.Text(
+                    "Vote nas prioridades",
+                    size=22,
+                    weight="bold",
+                    color=ft.colors.ORANGE_900,
+                ),
+                ft.Text(
+                    "Avalie de 1 a 5 estrelas o que você considera mais urgente.",
+                    size=13,
+                    color=ft.colors.BLUE_GREY_600,
+                ),
+                ft.Divider(color=ft.colors.ORANGE_200),
+                lista_obras_ui,
+            ]
+        ),
+        padding=15,
+        expand=True,
+        visible=False,
+    )
 
     def carregar_obras_morador():
         lista_obras_ui.controls.clear()
-        for ob in banco_dados.listar_obras():
-            lista_obras_ui.controls.append(ft.Card(content=ft.Container(padding=20, content=ft.Text(ob[1], weight="bold"))))
+        obras = banco_dados.listar_obras()
+        if not obras:
+            lista_obras_ui.controls.append(
+                ft.Text(
+                    "Nenhuma necessidade cadastrada.", text_align="center", italic=True
+                )
+            )
+        for ob in obras:
+            minha_nota = banco_dados.verificar_minha_nota(ob[0], unidade_logada)
+            botoes = [
+                ft.IconButton(
+                    icon=ft.icons.STAR if i <= minha_nota else ft.icons.STAR_BORDER,
+                    icon_color=ft.colors.AMBER_500
+                    if i <= minha_nota
+                    else ft.colors.GREY_400,
+                    icon_size=32,
+                    padding=0,
+                    on_click=lambda e, i_ob=ob[0], n=i: (
+                        banco_dados.registrar_avaliacao_obra(i_ob, unidade_logada, n),
+                        carregar_obras_morador(),
+                    ),
+                )
+                for i in range(1, 6)
+            ]
+            lista_obras_ui.controls.append(
+                ft.Card(
+                    elevation=4,
+                    content=ft.Container(
+                        padding=20,
+                        border_radius=10,
+                        border=ft.border.all(1, ft.colors.ORANGE_200),
+                        bgcolor=ft.colors.ORANGE_50,
+                        content=ft.Column(
+                            [
+                                ft.Text(
+                                    ob[1],
+                                    weight="bold",
+                                    size=18,
+                                    color=ft.colors.ORANGE_900,
+                                ),
+                                ft.Text(
+                                    f"Custo: {ob[3] or 'N/A'}",
+                                    size=12,
+                                    color=ft.colors.GREY_700,
+                                ),
+                                ft.Divider(),
+                                ft.Text(ob[2], size=14, color=ft.colors.BLUE_GREY_800),
+                                ft.Container(
+                                    padding=10,
+                                    border_radius=8,
+                                    bgcolor="white",
+                                    content=ft.Column(
+                                        [
+                                            ft.Text(
+                                                "Qual a urgência disto?",
+                                                size=12,
+                                                weight="bold",
+                                                color=ft.colors.BLUE_GREY_500,
+                                            ),
+                                            ft.Row(
+                                                botoes, alignment="center", spacing=0
+                                            ),
+                                        ],
+                                        horizontal_alignment="center",
+                                    ),
+                                ),
+                            ]
+                        ),
+                    ),
+                )
+            )
         page.update()
 
-    # Adicionando telas
-    page.add(tela_login, tela_dashboard, tela_documentos, tela_ouvidoria, tela_lista_assembleias, tela_pautas_assembleia, tela_obras, tela_reservas, tela_estatuto)
+    page.add(
+        tela_login,
+        tela_dashboard,
+        tela_documentos,
+        tela_ouvidoria,
+        tela_lista_assembleias,
+        tela_pautas_assembleia,
+        tela_obras,
+        tela_reservas,
+        tela_estatuto,
+    )
 
-# Ponto de entrada Web
+# ADAPTAÇÃO WEB: Porta variável de acordo com o servidor (Render)
 porta = int(os.environ.get("PORT", 8080))
 ft.app(target=main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir=ASSETS_DIR)
