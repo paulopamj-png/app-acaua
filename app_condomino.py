@@ -114,12 +114,13 @@ def main(page: ft.Page):
 
     campo_cpf = ft.TextField(
         label="CPF do Morador",
-        hint_text="Digite os números",
+        hint_text="Apenas números (sem pontos)",
         width=300,
         border_color=ft.colors.TEAL_600,
-        on_blur=formatar_cpf, 
+        # O filtro abaixo bloqueia qualquer letra ou ponto, aceitando só números
+        input_filter=ft.InputFilter(allow=True, regex_string=r"[0-9]", replacement_string=""),
         keyboard_type=ft.KeyboardType.NUMBER,
-        max_length=14,
+        max_length=11, 
         counter_text=" ",
     )
     
@@ -543,3 +544,4 @@ def main(page: ft.Page):
 # Ponto de Entrada Web
 porta = int(os.environ.get("PORT", 8080))
 ft.app(target=main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir=ASSETS_DIR)
+
