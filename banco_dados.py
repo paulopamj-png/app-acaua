@@ -624,3 +624,26 @@ def excluir_regra_estatuto(id_regra):
     conexao.close()
 
 
+def listar_comentarios_pauta(id_pauta):
+    try:
+        conexao = conectar()
+        cursor = conexao.cursor()
+        cursor.execute("SELECT unidade, comentario, TO_CHAR(data_hora, 'DD/MM HH24:MI') FROM debates_pauta WHERE id_pauta = %s ORDER BY data_hora ASC", (id_pauta,))
+        comentarios = cursor.fetchall()
+        conexao.close()
+        return comentarios
+    except Exception as e:
+        print(f"Erro ao listar comentarios: {e}")
+        return []
+
+def adicionar_comentario_pauta(id_pauta, unidade, comentario):
+    try:
+        conexao = conectar()
+        cursor = conexao.cursor()
+        cursor.execute("INSERT INTO debates_pauta (id_pauta, unidade, comentario) VALUES (%s, %s, %s)", (id_pauta, unidade, comentario))
+        conexao.commit()
+        conexao.close()
+        return True
+    except Exception as e:
+        print(f"Erro ao adicionar comentario: {e}")
+        return False
